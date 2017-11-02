@@ -1,0 +1,27 @@
+<tr>
+    <td colspan="4" class="text-right">Report</td>
+    <td>
+        {% if report_income_cash > 0 %}
+        {{ round(report_income_cash, 2) }}
+        {% end %}
+    </td>
+    <td>
+        {% if report_income_bank > 0 %}
+        {{ round(report_income_bank, 2) }}
+        {% end %}
+    </td>
+    <td>
+        {% if report_payment_cash > 0 %}
+        {{ round(report_payment_cash, 2) }}
+        {% end %}
+    </td>
+    <td>
+        {% if report_payment_bank > 0 %}
+        {{ round(report_payment_bank, 2) }}
+        {% end %}
+    </td>
+</tr>
+</table>
+{% if not last %}
+<div class="page separator" style="page-break-before:always;"></div>
+{% end %}

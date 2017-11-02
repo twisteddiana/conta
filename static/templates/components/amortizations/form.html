@@ -1,0 +1,125 @@
+<form ng-submit="submit(organisationForm.$valid)" novalidate name="organisationForm">
+    <div class="page-header col-lg-10">
+        <div class="toolbar">
+            <div class="text-right">
+                <button class="btn btn-success" ng-disabled="organisationForm.$invalid">
+                    <i class="fa fa-check"></i> Save
+                </button>
+            </div>
+        </div>
+        <h2>{{title}} <span>{{subtitle}}</span></h2>
+    </div>
+    <div class="col-xs-12">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="box">
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Data darii in folosinta</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="input-group">
+                                <input type="text" ui-mask="99-99-9999" class="form-control" required data-ng-model="item.date" ui-mask-placeholder ui-mask-placeholder-char="_">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Denumire</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" required ng-required="{string}" data-ng-model="item.name" name="name" value="item.name">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Descriere</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <textarea class="form-control" required ng-required="{string}" data-ng-model="item.description" name="description">{{item.description}}</textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Nr. document provenienta</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" required ng-required="{string}" data-ng-model="item.document_number" name="document_number" value="item.document_number">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Valoare de inventar</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="input-group">
+                                <div class="input-group-addon">{{item.currency}}</div>
+                                <input type="number" data-ng-model="item.amount" required ng-required="{float}" name="amount" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Durata functionare (luni)</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <input type="number" class="form-control" required ng-required="{number}" data-ng-model="item.duration" name="name" value="item.duration">
+                        </div>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Grupa</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" data-ng-model="item.group" name="group" value="{{item.group}}">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Cod clasificare</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" data-ng-model="item.classification_code" name="classification_code" value="{{item.classification_code}}">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Numar de inventar</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" data-ng-model="item.inventory_number" name="inventory_number" value="{{item.inventory_number}}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="box">
+                    <h4>Sumar</h4>
+                    <table class="table overview_table">
+                        <tr ng-if="item.date">
+                            <td>Data</td>
+                            <td>{{item.date}}</td>
+                        </tr>
+                        <tr ng-if="item.amount">
+                            <td>Valoare de inventar</td>
+                            <td>{{item.amount}} {{item.currency}}</td>
+                        </tr>
+                        <tr ng-if="item.amount && item.duration">
+                            <td>Amortizare lunara</td>
+                            <td>{{item.amount / item.duration}} {{item.currency}}</td>
+                        </tr>
+                        <tr ng-if="item._id">
+                            <td>Fisa mijlocului fix</td>
+                            <td><a class="btn btn-green" ng-click="downloadSheet()">Descarca <i class="fa fa-download"></i></a></td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form>

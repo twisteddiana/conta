@@ -1,0 +1,98 @@
+<style>
+    .container {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 13px;
+    }
+    .text-center {
+        text-align: center;
+    }
+    table {
+        width: 100%;
+    }
+    table tr td {
+        padding: 5px;
+        border: 1px solid #333;
+        page-break-inside:avoid;
+    }
+    table tr {
+        page-break-inside:avoid;
+    }
+    table {
+        border-collapse: collapse;
+    }
+    .text-right {
+        text-align: right;
+    }
+    td.date {
+        width: 100px;
+    }
+    td.doc_type {
+        width: 150px;
+    }
+</style>
+<div class="container">
+
+    {% set report_income_cash = 0 %}
+    {% set report_income_bank = 0 %}
+    {% set report_payment_cash = 0 %}
+    {% set report_payment_bank = 0 %}
+    {% set last = False %}
+        {% include 'includes/registry_header.html' %}
+        {% set counter = 0 %}
+        {% for transaction in transactions %}
+        <tr>
+            <td>
+                {% set counter = counter + 1 %}
+                {{ counter }}
+            </td>
+            <td>{{ transaction['date'] }}</td>
+            <td>
+                {{ transaction['document_type'] }} <br>
+                {{ transaction['document_number'] }}
+            </td>
+            <td>
+                {{ transaction['description'] }}
+            </td>
+            <td>
+                {% if transaction['type'] == 'income' %}
+                {% if transaction['payment_type'] == 'Cash' %}
+                {{ transaction['amount'] }}
+                {% set report_income_cash += transaction['amount'] %}
+                {% end %}
+                {% end %}
+            </td>
+            <td>
+                {% if transaction['type'] == 'income' %}
+                {% if transaction['payment_type'] == 'Bank' %}
+                {{ transaction['amount'] }}
+                {% set report_income_bank += transaction['amount'] %}
+                {% end %}
+                {% end %}
+            </td>
+            <td>
+                {% if transaction['type'] == 'payment' %}
+                {% if transaction['payment_type'] == 'Cash' or transaction['payment_type'] == '-' %}
+                {{ transaction['amount'] }}
+                {% set report_payment_cash += transaction['amount'] %}
+                {% end %}
+                {% end %}
+            </td>
+            <td>
+                {% if transaction['type'] == 'payment' %}
+                {% if transaction['payment_type'] == 'Bank' %}
+                {{ transaction['amount'] }}
+                {% set report_payment_bank += transaction['amount'] %}
+                {% end %}
+                {% end %}
+            </td>
+        </tr>
+        {% if counter % 19 == 0 %}
+            {% include 'includes/registry_footer.html' %}
+            {% include 'includes/registry_header.html' %}
+        {% end %}
+        {% end %}
+        {% if counter % 19 != 0 %}
+            {% set last = True %}
+            {% include 'includes/registry_footer.html' %}
+        {% end %}
+</div>

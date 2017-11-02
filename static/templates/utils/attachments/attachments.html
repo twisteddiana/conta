@@ -1,0 +1,24 @@
+<div class="attachments" ng-if="item._attachments">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Content type</th>
+                <th>Length</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="(name, value) in item._attachments">
+                <td><a ng-click="getAttachment(name, value)">{{name}}</a></td>
+                <td>{{value.content_type}}</td>
+                <td>{{value.length}}</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-danger" ng-click="deleteAttachment(name)">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

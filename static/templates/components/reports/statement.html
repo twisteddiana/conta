@@ -1,0 +1,115 @@
+<div class="page-header col-lg-10">
+    <div class="toolbar">
+        <div class="text-right">
+
+        </div>
+    </div>
+    <h2>{{title}} <span>{{subtitle}}</span></h2>
+</div>
+<div class="col-xs-12">
+    <div class="box">
+        <form ng-submit="submit(statement.$valid)" novalidate name="statement">
+            <div class="form-group row">
+                <div class="col-lg-2">
+                    <label class="form-control-label">Anul</label>
+                </div>
+                <div class="col-lg-2">
+                    <select ng-model="year" class="form-control" required>
+                        <option value="{{year}}" ng-repeat="year in crange(current_year-7, current_year)">{{year}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-2"></div>
+                <div class="col-lg-2">
+                    <button class="btn btn-success" ng-disabled="statement.$invalid">
+                        <i class="fa fa-check"></i> Genereaza declaratia
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="box" ng-if="response">
+        <div class="row">
+            <div class="col-lg-6">
+                <table class="table-responsive table-list big">
+                    <thead>
+                    <tr>
+                        <th colspan="3">Declaratia 200</th>
+                    </tr>
+                    </thead>
+                    <tr>
+                        <td colspan="2">1. Venit brut</td>
+                        <td class="text-lg-right">{{response.brut_income}} RON</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">2. Cheltuieli deductibile, din care:</td>
+                        <td class="text-lg-right">{{response.payments}} RON</td>
+                    </tr>
+                    <tr>
+                        <td width="50px"></td>
+                        <td width="500px">2. Contributii sociale obligatorii, potrivit legii</td>
+                        <td class="text-lg-right">{{response.social_payments}} RON</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            3. Venit net anual (rd.1-rd.2), din care:
+                        </td>
+                        <td class="text-lg-right">{{response.net_income}} RON</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>3.1. Venit net aferent activităţilor cu regim de reţinere la sursă a impozitului</td>
+                        <td class="text-lg-right"> {{response.untaxable_income}} RON</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-lg-6">
+                <table class="table-responsive table-list">
+                    <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Impozit pe venit</th>
+                        <th>CAS (pensie)</th>
+                        <th>CASS (sanatate)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Martie</td>
+                        <td>{{(response.income_tax / 4).toFixed(2)}}</td>
+                        <td>{{(response.pension / 4).toFixed(2)}}</td>
+                        <td>{{(response.medical_insurance / 4).toFixed(2)}}</td>
+                    </tr>
+                    <tr>
+                        <td>Iunie</td>
+                          <td>{{(response.income_tax / 4).toFixed(2)}}</td>
+                        <td>{{(response.pension / 4).toFixed(2)}}</td>
+                        <td>{{(response.medical_insurance / 4).toFixed(2)}}</td>
+                    </tr>
+                    <tr>
+                        <td>Septembrie</td>
+                          <td>{{(response.income_tax / 4).toFixed(2)}}</td>
+                        <td>{{(response.pension / 4).toFixed(2)}}</td>
+                        <td>{{(response.medical_insurance / 4).toFixed(2)}}</td>
+                    </tr>
+                    <tr>
+                        <td>Decembrie</td>
+                          <td>{{(response.income_tax / 4).toFixed(2)}}</td>
+                        <td>{{(response.pension / 4).toFixed(2)}}</td>
+                        <td>{{(response.medical_insurance / 4).toFixed(2)}}</td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>Total</td>
+                            <td>{{response.income_tax}}</td>
+                            <td>{{response.pension}}</td>
+                            <td>{{response.medical_insurance}}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

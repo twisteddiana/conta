@@ -1,0 +1,125 @@
+<style>
+    .container {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 13px;
+    }
+    .center {
+        text-align: center;
+    }
+    table {
+        width: 100%;
+    }
+    tr.heading {
+        font-weight: bold;
+    }
+    tr.grey {
+        background: #bbb;
+    }
+    table tr td {
+        padding: 5px;
+        border: 1px solid #333;
+        page-break-inside:avoid;
+    }
+    table {
+        border-collapse: collapse;
+    }
+
+    table tr, table tbody {
+        page-break-inside: avoid;
+    }
+
+    td.empty {
+        border:none;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+</style>
+<div class="container">
+    <div class="center">
+        <h1>Jurnal priving operatiuni diverse<br/>pentru {{ classification }}</h1>
+    </div>
+    <table>
+        {% set to_report = report %}
+        {% set month = 0 %}
+        {% set year = 0 %}
+        {% set counter = 0 %}
+
+        {% for transaction in transactions %}
+            {% if transaction['month'] != month or transaction['year'] != year %}
+                {% if month != 0 %}
+                    <tr>
+                        <td colspan="4" class="text-right">
+                            De reportat
+                        </td>
+                        <td class="text-right">
+                            {{ round(to_report, 2) }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">&nbsp;</td>
+                    </tr>
+                {% end %}
+                <tr class="heading grey">
+                    <td colspan="5">
+                        Luna {{ transaction['month'] }}, anul {{ transaction['year'] }}
+                    </td>
+                </tr>
+                <tr class="heading grey">
+                    <td>Nr. Crt.</td>
+                    <td>Data document</td>
+                    <td>Document (fel, numar)</td>
+                    <td>Explicatii</td>
+                    <td class="text-right">Suma</td>
+                </tr>
+                <tr>
+                    <td class="center">0</td>
+                    <td class="center">1</td>
+                    <td class="center">2</td>
+                    <td class="center">3</td>
+                    <td class="center">4</td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="text-right">
+                        Report
+                    </td>
+                    <td class="text-right">
+                        {{ round(to_report, 2) }}
+                    </td>
+                </tr>
+                {% set month = transaction['month'] %}
+                {% set year = transaction['year'] %}
+                {% set counter = 0 %}
+            {% end %}
+            <tr>
+                <td class="center">
+                    {% set counter += 1 %}
+                    {{ counter }}
+                </td>
+                <td>
+                    {{ transaction['date'] }}
+                </td>
+                <td>
+                    {{ transaction['document_type'] }} {{ transaction['document_number'] }}
+                </td>
+                <td>
+                    {{ transaction['description'] }}
+                </td>
+                <td class="text-right">
+                    {{ transaction['amount'] }}
+                </td>
+            </tr>
+            {% set to_report += round(transaction['amount'], 2) %}
+        {% end %}
+        <tr>
+            <td colspan="4" class="text-right">
+                De reportat
+            </td>
+            <td class="text-right">
+                {{ round(to_report, 2) }}
+            </td>
+        </tr>
+    </table>
+</div>

@@ -1,0 +1,179 @@
+<form ng-submit="submit(organisationForm.$valid)" novalidate name="organisationForm">
+    <div class="page-header col-lg-10">
+        <div class="toolbar">
+            <div class="text-right">
+                <button class="btn btn-success" ng-disabled="organisationForm.$invalid">
+                    <i class="fa fa-check"></i> Save
+                </button>
+            </div>
+        </div>
+        <h2>{{title}} <span>{{subtitle}}</span></h2>
+    </div>
+    <div class="col-xs-12">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="box">
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Org.</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" ng-model="item.organisation" list="organisation_list">
+                            <datalist id="organisation_list">
+                                <option ng-repeat="organisation in organisations" value="{{organisation.value}}"></option>
+                            </datalist>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Clasificare</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" ng-model="item.classification" list="classification_list">
+                            <datalist id="classification_list">
+                                <option value="CAS (pensie)">CAS (pensie)</option>
+                                <option value="CASS (sanatate)">CASS (sanatate)</option>
+                                <option value="Impozit">Impozit</option>
+                                <option value="Asigurari">Asigurari</option>
+                                <option value="Masina">Masina</option>
+                                <option value="Comision bancar">Comision bancar</option>
+                                <option value="Intretinere">Intretinere</option>
+                                <option value="Telefonie">Telefonie</option>
+                                <option value="Achizitii">Achizitii</option>
+                            </datalist>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Data</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="input-group">
+                                <input type="text" ng-model-options="{allowInvalid: true}" data-ng-change="updateExchangeRate()" ui-mask="99-99-9999" class="form-control" required data-ng-model="item.date" ui-mask-placeholder ui-mask-placeholder-char="_">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Tip doc.</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <select class="form-control" required ng-required="{string}" data-ng-model="item.document_type">
+                                <option value="Chitanta">Chitanta</option>
+                                <option value="Extras de cont">Extras de cont</option>
+                                <option value="Registru jurnal">Registru jurnal</option>
+                                <option value="Decont">Decont</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Nr. doc.</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" required ng-required="{string}" data-ng-model="item.document_number" name="name" value="item.document_number">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Detalii</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" required ng-required="{string}" data-ng-model="item.description" name="name" value="item.description">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Moneda</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <select ng-model-options="{allowInvalid: true}" data-ng-model="item.currency" required class="form-control" ng-change="updateExchangeRate()" >
+                                <option data-ng-repeat="currency in currencies" value="{{currency.doc.iso}}">
+                                    {{currency.doc.iso}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Suma</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="input-group">
+                                <div class="input-group-addon">{{item.currency}}</div>
+                                <input type="number" data-ng-model="item.amount" required ng-required="{float}" name="amount" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Val. deductibila</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="input-group">
+                                <div class="input-group-addon">%</div>
+                                <input type="number" data-ng-model="item.deductible" required ng-required="{float}" name="deductible" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4">
+                            <label class="form-control-label">Tip tranzactie</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <select data-ng-model="item.payment_type" class="form-control" required>
+                                <option value="Cash">Cash</option>
+                                <option value="Bank">Bank</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="box">
+                    <h4>Overview</h4>
+
+                    <table class="table overview_table">
+
+                        <tr ng-if="item.organisation">
+                            <td>Org.</td>
+                            <td>{{item.organisation}}</td>
+                        </tr>
+                        <tr ng-if="item.date">
+                            <td>Data</td>
+                            <td>{{item.date}}</td>
+                        </tr>
+                        <tr ng-if="item.currency">
+                            <td>Moneda</td>
+                            <td>{{item.currency}}</td>
+                        </tr>
+                        <tr ng-if="item.amount">
+                            <td>Suma</td>
+                            <td>{{item.amount}} {{item.currency}}</td>
+                        </tr>
+                        <tr ng-if="item.currency && item.currency != main_currency">
+                            <td>Exchange Rate</td>
+                            <td>{{exchange_rate}}</td>
+                        </tr>
+                        <tr ng-if="exchange_rate && item.currency">
+                            <td>Valoare</td>
+                            <td>{{item.amount * exchange_rate | number:2}} {{main_currency}}</td>
+                        </tr>
+                        <tr ng-if="item.amount && exchange_rate">
+                            <td>Valoare deductibila</td>
+                            <td>{{item.amount * exchange_rate * item.deductible / 100 | number:2}} {{main_currency}}</td>
+                        </tr>
+                    </table>
+                </div>
+                 <div class="box">
+                    <h4>Atasamente</h4>
+                    <attachments></attachments>
+                    <div class="form-group">
+                        <input type="file" multiple file-model="attachments">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

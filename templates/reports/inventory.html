@@ -1,0 +1,95 @@
+<style>
+    .container {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 13px;
+    }
+    .text-center {
+        text-align: center;
+    }
+    table {
+        widtd: 100%;
+    }
+    tr.heading {
+        font-weight: bold;
+    }
+    tr.grey {
+        background: #bbb;
+    }
+    table tr td {
+        padding: 5px;
+        border: 1px solid #333;
+        page-break-inside:avoid;
+    }
+    table {
+        border-collapse: collapse;
+    }
+
+    table tr, table tbody {
+        page-break-inside: avoid;
+    }
+
+    td.empty {
+        border:none;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+</style>
+<div class="container">
+    <h1 class="text-center">Registrul-Inventar</h1>
+    <p class="text-center">la data de {{ inventory_date }}</p>
+    <table>
+        <tr>
+            <td rowspan="2" class="text-center">
+                Nr. crt.
+            </td>
+            <td rowspan="2" class="text-center">
+                Recapitularea elementelor inventariate
+            </td>
+            <td rowspan="2" class="text-center">
+                Valoarea contabila
+            </td>
+            <td rowspan="2" class="text-center">
+                Valoarea de inventar
+            </td>
+            <td class="text-center" colspan="2" >
+                Diferente din evaluare (de inregistrat) ca rezultat
+            </td>
+        </tr>
+        <tr>
+            <td class="text-center">Valoare</td>
+            <td class="text-center">Cauze/diferente</td>
+        </tr>
+        <tr>
+            <td class="text-center">0</td>
+            <td class="text-center">1</td>
+            <td class="text-center">2</td>
+            <td class="text-center">3</td>
+            <td class="text-center">4</td>
+            <td class="text-center">5</td>
+        </tr>
+        {% for index, row in enumerate(inventory) %}
+        <tr>
+            <td class="text-center">
+                {{ index + 1 }}
+            </td>
+            <td>
+                {{ row['name'] }}
+            </td>
+            <td class="text-right">
+                {{ round(row['value'], 2) }}
+            </td>
+            <td class="text-right">
+                {{ round(row['inventory_value'], 2) }}
+            </td>
+            <td class="text-right">
+                {{ round(row['value'] - row['inventory_value'], 2) }}
+            </td>
+            <td>
+                {{ row['description'] }}
+            </td>
+        </tr>
+        {% end %}
+    </table>
+</div>

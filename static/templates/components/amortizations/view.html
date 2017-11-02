@@ -1,0 +1,35 @@
+<div class="page-header col-lg-10">
+    <div class="toolbar">
+        <div class="text-right">
+            <a href ng-click="add()" class="btn btn-success"><i class="fa fa-plus"></i> Nou</a>
+        </div>
+    </div>
+    <h2>{{title}} <span>{{subtitle}}</span></h2>
+</div>
+<div class="col-xs-12">
+    <div class="box">
+        <table class="table-list">
+            <thead>
+            <tr>
+                <th ng-click="changeSort('date')">Data</th>
+                <th>Transa</th>
+                <th ng-click="changeSort('name')">Nume</th>
+                <th ng-click="changeSort('amount')">Valoare</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="installment in rows">
+                <td>{{installment.doc.date_clear}}</td>
+                <td>#{{installment.doc.installment}}</td>
+                <td>{{installment.doc.name}}</td>
+                <td>{{installment.doc.amount}} {{item.currency}}</td>
+            </tr>
+            <tr ng-if="!rows.length">
+                <td class="text-lg-center" colspan="9">
+                    No items in this table
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

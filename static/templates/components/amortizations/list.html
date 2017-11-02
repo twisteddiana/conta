@@ -1,0 +1,57 @@
+<div class="page-header col-lg-10">
+    <div class="toolbar">
+        <div class="text-right">
+            <button class="btn btn-warning" ng-click="synchronizePayments()">
+                <span ng-if="!synchronizing">
+                    <i class="fa fa-refresh"></i> Sincronizare plati
+                </span>
+                <span ng-if="synchronizing">
+                    <i class="fa-refresh fa-spin"></i> In curs de sincronizare
+                </span>
+
+            </button>
+            <a href ng-click="add()" class="btn btn-success"><i class="fa fa-plus"></i> Nou</a>
+        </div>
+    </div>
+    <h2>{{title}} <span>{{subtitle}}</span></h2>
+</div>
+<div class="col-xs-12">
+    <div class="box">
+        <table class="table-list">
+            <thead>
+            <tr>
+                <th ng-click="changeSort('date')">Data</th>
+                <th ng-click="changeSort('name')">Denumire</th>
+                <th ng-click="changeSort('duration')">Durata</th>
+                <th ng-click="changeSort('amount')">Valoare</th>
+                <th>Valoare amortizata</th>
+                <th>Ultima transa</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in rows">
+                <td>{{item.doc.date_clear}}</td>
+                <td>{{item.doc.name}}</td>
+                <td>{{item.doc.duration}} luni</td>
+                <td>{{item.doc.amount}} {{item.doc.currency}}</td>
+                <td>{{item.doc.liquidated.toFixed(2)}} {{item.doc.currency}}</td>
+                <td>{{item.doc.last_date_clear}}</td>
+                <td class="quick-actions">
+                    <div class="btn-group">
+                        <button ng-click="edit(item.id)" class="btn btn-sm btn-success"><i class="fa fa-pencil"></i></button>
+                        <button ng-click="view(item.id)" class="btn btn-sm btn-yellow"><i class="fa fa-search"></i></button>
+                        <button ng-click="delete(item.id)" class="btn btn-sm btn-red"><i class="fa fa-trash"></i></button>
+                    </div>
+                    <button ng-click="downloadSheet(item)" class="btn btn-sm btn-green"><i class="fa fa-download"></i></button>
+                </td>
+            </tr>
+            <tr ng-if="!rows.length">
+                <td class="text-lg-center" colspan="9">
+                    No items in this table
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

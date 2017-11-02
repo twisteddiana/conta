@@ -1,0 +1,74 @@
+<div class="page-header col-lg-10">
+    <div class="toolbar">
+        <div class="text-right">
+            <a ng-click="display_filter()" class="btn btn-warning">Filtru</a>
+            <a href ng-click="add()" class="btn btn-success"><i class="fa fa-plus"></i> Nou</a>
+        </div>
+    </div>
+    <h2>{{title}} <span>{{subtitle}}</span></h2>
+</div>
+<div class="col-xs-12">
+    <div class="box" ng-if="show_filter">
+        <filter></filter>
+    </div>
+    <div class="box">
+        <table class=" table-list">
+            <thead>
+            <tr>
+                <!--<th ng-click="changeSort('id')">ID</th>-->
+                <th ng-click="changeSort('date')">Data</th>
+                <th ng-click="changeSort('classification')">Clasificare</th>
+                <th ng-click="changeSort('document_type')">Tip document</th>
+                <th ng-click="changeSort('document_number')">Nr. doc.</th>
+                <th>Detalii</th>
+
+                <th class="text-lg-right">Suma</th>
+                <th ng-click="changeSort('real_amount')" class="text-lg-right">Valoare</th>
+                <th ng-click="changeSort('deductible_amount')" class="text-lg-right">V. deductibila</th>
+                <th ng-click="changeSort('payment_type')">Tip tranzactie</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in rows">
+                <!--<td>{{item.id}}</td>-->
+                <td>{{item.doc.date_clear}}</td>
+                <td>{{item.doc.classification}}</td>
+                <td>{{item.doc.document_type}}</td>
+                <td>{{item.doc.document_number}}</td>
+                <td>{{item.doc.description}}</td>
+
+                <td class="text-lg-right">{{item.doc.amount.toFixed(2)}} {{item.doc.currency}}</td>
+                <td class="text-lg-right">{{item.doc.real_amount.toFixed(2)}} RON</td>
+                <td class="text-lg-right">{{item.doc.deductible_amount.toFixed(2)}} RON</td>
+                <td>{{item.doc.payment_type}}</td>
+                <td class="quick-actions">
+                    <div class="btn-group">
+                    <button ng-click="edit(item.id)" ng-if="item.doc.classification != 'Amortizari'" class="btn btn-sm btn-success"><i class="fa fa-pencil"></i></button>
+                    <button ng-click="delete(item.id)" ng-if="item.doc.classification != 'Amortizari'" class="btn btn-sm btn-red"><i class="fa fa-trash"></i></button>
+                        </div>
+                </td>
+            </tr>
+            <tr ng-if="!rows.length">
+                <td class="text-lg-center" colspan="9">
+                    No items in this table
+                </td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+                <td>
+                    <h3><nr_rows></nr_rows></h3>
+                </td>
+                <td colspan="5">
+                    <h3>TOTAL</h3>
+                </td>
+                <td colspan="4">
+                    <h3> <deductible_total></deductible_total> / <total></total></h3>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+        <pagination></pagination>
+    </div>
+</div>

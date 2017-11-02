@@ -1,0 +1,37 @@
+<div class="row">
+    <div class="col-lg-3">
+        <div class="paginate">
+            <div class="pull-left">
+                <label class="form-control-label">Per Pagina</label>
+            </div>
+            <div class="pull-left">
+                <select class="form-control" ng-change="changeLimit()" data-ng-model="limit">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="500">500</option>
+                    <option value="1000">1000</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3"></div>
+    <div class="col-lg-6">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item" ng-class="{'disabled': ((skip / limit) + 1 == 1), 'previous': true}">
+                    <a href class="page-link" ng-click="prevPage()"><i class="fa fa-chevron-left"></i></a>
+                </li>
+                <li class="page-item" ng-repeat="n in range(1,pages)"
+                    ng-class="{active: n == (skip / limit) + 1}"
+                    ng-click="setPage(n)">
+                    <a href class="page-link" ng-bind="n">1</a>
+                </li>
+                <li class="page-item" ng-class="{'disabled': ((skip / limit) + 1 == pages), 'next': true}">
+                    <a href class="page-link" ng-click="nextPage()"><i class="fa fa-chevron-right"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>

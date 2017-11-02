@@ -1,0 +1,93 @@
+<style>
+     .container {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 13px;
+    }
+    .text-center {
+        text-align: center;
+    }
+    table {
+        width: 100%;
+    }
+    table tr td {
+        padding: 15px;
+        border: 1px solid #333;
+        page-break-inside:avoid;
+    }
+    table tr {
+        page-break-inside:avoid;
+    }
+    table {
+        border-collapse: collapse;
+    }
+    .text-right {
+        text-align: right;
+    }
+    td.date {
+        width: 100px;
+    }
+    td.doc_type {
+        width: 150px;
+    }
+    ul {
+        list-style: none;
+    }
+    h1 {
+        margin-top: 0;
+    }
+</style>
+<div class="container">
+    <table width="100%">
+        <tr>
+            <td width="50%" rowspan="6" style="vertical-align: top">
+                <h1 class="text-center">
+                    FISA MIJLOCULUI FIX
+                </h1>
+                <p>Nr. inventar: <strong>{{ item['inventory_number'] }}</strong></p>
+                <p>Nr. document provenienta: <strong>{{ item['document_number'] }}</strong></p>
+                <p>Valoare de inventar: <strong>{{ item['amount'] }} {{ item['currency'] }}</strong></p>
+                <p>Amortizare lunara <strong>{{ round(item['amount'] / item['duration'], 2) }}</strong></p>
+                <br><br>
+                <p>Denumirea mijlocului fix si caracteristici tehnice</p>
+                <p>{{ item['name'] }}</p>
+                <p>{{ item['description'] }}</p>
+            </td>
+            <td>
+                Grupa: <strong>{{ item['group'] }}</strong>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Codul de clasificare: <strong>{{ item['classification_code'] }}</strong>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>Data darii in folosita</p>
+                <ul>
+                    <li>Anul: {{ item['date'].year }}</li>
+                    <li>Luna: {{ item['date'].month }}</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>Data amoritizarii complete</p>
+                <ul>
+                    <li>Anul: {{ item['last_date'].year }}</li>
+                    <li>Luna: {{ item['last_date'].month }}</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>Durata normala de functionare: <strong>{{ item['duration'] }} luni</strong></p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Cota de amortizare: <strong>100%</strong>
+            </td>
+        </tr>
+    </table>
+</div>

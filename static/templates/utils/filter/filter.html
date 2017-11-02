@@ -1,0 +1,40 @@
+
+
+<table class="table">
+    <thead>
+    <tr>
+        <th ng-repeat="filter in filters">
+            {{filter.name}}
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td ng-repeat="filter in filters">
+            <div ng-if="filter.type == 'range'">
+                <label class="filter-label">De la</label>
+                <input type="text" class="form-control" ng-if="filter.format == 'date'" ui-mask="99-99-9999" data-ng-model="filter.value.start_key" ui-mask-placeholder ui-mask-placeholder-char="_">
+                <input type="number" class="form-control" ng-if="filter.format == 'number'" data-ng-model="filter.value.start_key">
+                <label class="filter-label">Pana la</label>
+                <input type="text" class="form-control" ng-if="filter.format == 'date'" ui-mask="99-99-9999" class="form-control" data-ng-model="filter.value.end_key" ui-mask-placeholder ui-mask-placeholder-char="_">
+                <input type="number" class="form-control" ng-if="filter.format == 'number'" data-ng-model="filter.value.end_key">
+            </div>
+            <div ng-if="filter.type == 'select'">
+                <label class="filter-label" ng-repeat="value in filter.values">
+                    <input type="checkbox" value="{{value.key[0]}}" data-ng-model="value.checked" ng-click="updateFilter(filter)">
+                    {{value.key[0]}}
+                </label>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-lg-6">
+        <button class="btn btn-yellow" ng-click="clean_filter()">Sterge filtru</button>
+    </div>
+    <div class="col-lg-6 text-lg-right">
+        <button class="btn btn-green" ng-click="execute_filter()">Aplica filtru</button>
+    </div>
+</div>

@@ -1,0 +1,91 @@
+<style>
+    .container {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 20px;
+    }
+    .text-center {
+        text-align: center;
+    }
+    table {
+        width: 100%;
+    }
+    tr.heading {
+        font-weight: bold;
+        text-align: center;
+    }
+    tr.grey {
+        background: #bbb;
+    }
+    table tr td {
+        padding: 5px;
+        border: 1px solid #333;
+        page-break-inside:avoid;
+    }
+    table {
+        border-collapse: collapse;
+    }
+
+    table tr, table tbody {
+        page-break-inside: avoid;
+    }
+
+    td.empty {
+        border:none;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+</style>
+
+<div class="container">
+    <div class="text-center">
+        <h2>Barsan Diana Andra PFA</h2>
+        <h2>DECONT DE CHELTUIELI CONTRACT DE COMODAT</h2>
+    </div>
+    <div class="text-center">
+        <h3>INREGISTRAT LA NR. {{ item['document_number'] }}</h3>
+    </div>
+    <br><br>
+    <div>Subsemnata <b>Barsan Diana Andra</b>, Avand functia de administrator</div>
+    <div>Anexez prezentului decont acte justificative specifice, in borderoul de pe verso</div>
+    <div>pentru justificare platii de la data de <b>{{ item['date_clear'] }}</b></div>
+    <br>
+    <div><b>TOTAL LEI {{ round(item['amount'], 2) }}</b></div>
+    <br>
+    <div>Cheltuieli conform borderoului de pe verso <b>LEI {{ round(item['deductible_amount'], 2) }}</b></div>
+    <br><br>
+    <div>Verificat si gasit in regula pentru suma de lei <b>LEI {{ round(item['deductible_amount'], 2) }}</b></div>
+    <br><br>
+    <div>Data {{ item['date_clear'] }}</div>
+    <br>
+    <div>Semnatura </div>
+    <div style="page-break-before:always;"></div>
+    <div class="text-center">
+        <h3>BORDEROUL ACTELOR JUSTIFICATIVE DE CHELTUIELI</h3>
+    </div>
+    <table>
+        <tr class="heading">
+            <td>Nr.</td>
+            <td>Felul actului</td>
+            <td>Nr. si data actului</td>
+            <td>Suma</td>
+            <td>Suma deductibila</td>
+        </tr>
+        {% for index, row in enumerate(item['items']) %}
+            <tr>
+                <td>{{ index + 1 }}</td>
+                <td>Factura</td>
+                <td>{{ row['document_number'] }} {{ row['date'] }}</td>
+                <td class="text-right">{{ row['amount'] }}</td>
+                <td class="text-right">{{ round(row['deductible_amount'], 2) }}</td>
+            </tr>
+        {% end %}
+        <tr class="heading">
+            <td></td>
+            <td colspan="2" class="text-right">TOTAL</td>
+            <td class="text-right">{{ round(item['amount'], 2) }}</td>
+            <td class="text-right">{{ round(item['deductible_amount'], 2) }}</td>
+        </tr>
+    </table>
+</div>

@@ -1,0 +1,135 @@
+<style>
+    .container {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 13px;
+    }
+    .center {
+        text-align: center;
+    }
+    table {
+        width: 100%;
+    }
+    tr.heading {
+        font-weight: bold;
+    }
+    tr.grey {
+        background: #bbb;
+    }
+    table tr td {
+        padding: 5px;
+        border: 1px solid #333;
+        page-break-inside:avoid;
+    }
+    table {
+        border-collapse: collapse;
+    }
+
+    table tr, table tbody {
+        page-break-inside: avoid;
+    }
+
+    td.empty {
+        border:none;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+</style>
+<div class="container">
+    <div class="center">
+        <h1>Fisa de operatiuni diverse pentru {{ classification }}</h1>
+    </div>
+
+    <table>
+        <tr class="heading">
+            <td>Nr. Crt.</td>
+            <td>Data document</td>
+            <td>Document (fel, numar)</td>
+            <td>Explicatii</td>
+            <td class="text-right">Suma</td>
+            <td>Observatii</td>
+        </tr>
+        {% set to_report = report %}
+        {% set month = 0 %}
+        {% set year = 0 %}
+        {% set month_total = 0 %}
+        {% set counter = 0 %}
+        {% for transaction in transactions %}
+        {% if transaction['month'] != month or transaction['year'] != year %}
+        {% if month != 0 and year != 0 %}
+        <tr>
+            <td class="empty"></td>
+            <td colspan="3">Total luna</td>
+            <td class="text-right">
+                {{ round(month_total, 2) }}
+            </td>
+        </tr>
+        <tr>
+            <td class="empty"></td>
+            <td colspan="3">Total cumulat de la inceput de an</td>
+            <td class="text-right">
+                {% set to_report += round(month_total, 2) %}
+                {{ round(to_report, 2) }}
+            </td>
+        </tr>
+        </tbody>
+        <tr>
+            <td colspan="6" class="empty">&nbsp;</td>
+        </tr>
+        {% end %}
+        {% set month = transaction['month'] %}
+        {% set year = transaction['year'] %}
+        {% set counter = 0 %}
+        {% set month_total = 0 %}
+        <tbody>
+        <tr class="heading grey">
+            <td colspan="6">
+                Luna {{ transaction['month'] }}, anul {{ transaction['year'] }}
+            </td>
+        </tr>
+        {% end %}
+        <tr>
+            <td class="center">
+                {% set counter += 1 %}
+                {{ counter }}
+            </td>
+            <td>
+                {{ transaction['date'] }}
+            </td>
+            <td>
+                {{ transaction['document_type'] }} {{ transaction['document_number'] }}
+            </td>
+            <td>
+                {{ transaction['description'] }}
+            </td>
+            <td class="text-right">
+                {{ transaction['amount'] }}
+            </td>
+            <td>
+                {% if transaction['deductible'] != 100 %}
+                {{ transaction['deductible'] }} %
+                {% end %}
+            </td>
+        </tr>
+        {% set month_total += round(transaction['amount'], 2) %}
+        {% end %}
+        <tr>
+            <td class="empty"></td>
+            <td colspan="3">Total luna</td>
+            <td class="text-right">
+                {{ round(month_total, 2) }}
+            </td>
+        </tr>
+        <tr>
+            <td class="empty"></td>
+            <td colspan="3">Total cumulat de la inceput de an</td>
+            <td class="text-right">
+                {% set to_report += round(month_total, 2) %}
+                {{ round(to_report, 2) }}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

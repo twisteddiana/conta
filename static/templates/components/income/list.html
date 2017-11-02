@@ -1,0 +1,66 @@
+<div class="page-header col-lg-10">
+    <div class="toolbar">
+        <div class="text-right">
+            <a ng-click="display_filter()" class="btn btn-warning">Filtrare</a>
+            <a href ng-click="add()" class="btn btn-success"><i class="fa fa-plus"></i> Nou</a>
+        </div>
+    </div>
+    <h2>{{title}} <span>{{subtitle}}</span></h2>
+</div>
+<div class="col-xs-12">
+    <div class="box" ng-if="show_filter">
+        <filter></filter>
+    </div>
+    <div class="box">
+        <table class="table-list">
+            <thead>
+            <tr>
+                <th ng-click="changeSort('date')">Data</th>
+                <th ng-click="changeSort('classification')">Clasificare</th>
+                <th ng-click="changeSort('document_type')">Tip document</th>
+                <th ng-click="changeSort('document_number')">Nr. doc.</th>
+                <th>Detalii</th>
+                <th>Suma</th>
+                <th ng-click="changeSort('real_amount')">Valoare</th>
+                <th ng-click="changeSort('payment_type')">Tip tranzactie</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in rows">
+                <td>{{item.doc.date_clear}}</td>
+                <td>{{item.doc.classification}}</td>
+                <td>{{item.doc.document_type}}</td>
+                <td>{{item.doc.document_number}}</td>
+                <td>{{item.doc.description}}</td>
+
+                <td class="text-lg-right">{{item.doc.amount}} {{item.doc.currency}}</td>
+                <td class="text-lg-right">{{item.doc.real_amount}} RON</td>
+                <td>{{item.doc.payment_type}}</td>
+                <td class="quick-actions">
+                    <div class="btn-group">
+                    <button ng-click="edit(item.id)" class="btn btn-sm btn-success"><i class="fa fa-pencil"></i></button>
+                    <button ng-click="delete(item.id)" class="btn btn-sm btn-red"><i class="fa fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>
+            <tr ng-if="!rows.length">
+                <td class="text-lg-center" colspan="9">
+                    No items in this table
+                </td>
+            </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="7">
+                        <h3>TOTAL</h3>
+                    </td>
+                    <td colspan="3">
+                        <h3><total></total></h3>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+        <pagination></pagination>
+    </div>
+</div>

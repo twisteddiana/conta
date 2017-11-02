@@ -1,0 +1,12 @@
+<div class="col-lg-2 side-menu">
+    <currencies></currencies>
+    <ul menus="menuItems" tag="sidebar" class="menu" id="side-menu">
+        <li ng-repeat="menu in menuItems | orderBy:'-priority'"  ng-class="{'active':menu.active}">
+            <a ng-if="!menu.state.abstract" ui-sref="{{menu.state.name}}">{{menu.name}}</a>
+            <a ng-if="menu.state.abstract">{{menu.name}}</a>
+            <ul ng-if="menu.children.length" class="nav-second-level nav">
+                <li ng-repeat="child in menu.children | orderBy:'-priority'" ng-class="{'active':child.active}"><a ui-sref="{{child.state.name}}">{{child.name}}</a></li>
+            </ul>
+        </li>
+    </ul>
+</div>
