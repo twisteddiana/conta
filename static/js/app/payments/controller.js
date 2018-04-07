@@ -1,7 +1,7 @@
 /**
  * Created by Diana on 11/12/2016.
  */
-Conta.controller("paymentsCtrl", function ($scope, $http, $state, Entity, $controller, SweetAlert) {
+angular.module('Conta').controller("paymentsCtrl", function ($scope, $http, $state, Entity, $controller, SweetAlert) {
     $scope.title = "Plati";
     $scope.subtitle = "Lista";
 
@@ -22,6 +22,9 @@ Conta.controller("paymentsCtrl", function ($scope, $http, $state, Entity, $contr
     };
     $scope.add = function() {
         $state.go('app.payments-add');
+    };
+    $scope.clone = function(id) {
+        $state.go('app.payments-clone', {entityID: id});
     };
     $scope.delete = function(id) {
         SweetAlert.swal({
@@ -45,7 +48,7 @@ Conta.controller("paymentsCtrl", function ($scope, $http, $state, Entity, $contr
 
 });
 
-Conta.controller("paymentsAddCtrl", function($scope, $http, Entity, Currency, Organisation, ExchangeRates, $state, $controller, EntityAttachmentUpload){
+angular.module('Conta').controller("paymentsAddCtrl", function ($scope, $http, Entity, Currency, Organisation, ExchangeRates, $state, $controller, EntityAttachmentUpload) {
     $scope.title = 'Add payment entity';
     $scope.subtitle = 'Income';
     $scope.item = {};
@@ -55,6 +58,8 @@ Conta.controller("paymentsAddCtrl", function($scope, $http, Entity, Currency, Or
 
     $controller('entityAddCtrl', { $scope: $scope });
 
+    console.log($state.parent);
+
     $scope.submit = function(isValid) {
         if (isValid) {
             $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
@@ -62,40 +67,35 @@ Conta.controller("paymentsAddCtrl", function($scope, $http, Entity, Currency, Or
             $scope.item.type = 'payment';
 
             Entity.create($scope.item)
-                .success(function (data) {
+                .then((data) => {
                     var entity = {
                         '_id': data.id,
                         '_rev': data.rev
                     };
                     if ($scope.attachments) {
-                        var uploaded = 0;
-                        angular.forEach($scope.attachments, function(attachment) {
-                            EntityAttachmentUpload.upload(attachment, entity).success(function (data) {
-                                uploaded++;
-                                if (uploaded == $scope.attachments.length)
-                                    $state.go('app.payments');
-                            })
-                        })
+                        EntityAttachmentUpload.upload($scope.attachments, entity).then(() => {
+                            $state.go('app.payments');
+                        });
                     } else {
                         $state.go('app.payments');
                     }
                     $state.go('app.payments');
                 })
-                .error(function (data, status) {
+                .catch((data, status) => {
                     if (status == 500)
                         $scope.errors = data;
                 });
         }
     }
-})
+});
 
 
-Conta.controller("paymentsEditCtrl", function($scope, $http, Entity, Organisation, Currency, ExchangeRates, $state, $stateParams, $controller, EntityAttachmentUpload){
+angular.module('Conta').controller("paymentsEditCtrl", function($scope, $http, Entity, Organisation, Currency, ExchangeRates, $state, $stateParams, $controller, EntityAttachmentUpload){
     $scope.title = 'Edit payment entity';
     $scope.subtitle = 'Payment';
     $scope.item_id = $stateParams.entityID;
     $scope.item = {}
-    Entity.getOne($scope.item_id).success(function(data) {
+    Entity.getOne($scope.item_id).then((data) => {
         $scope.item = data;
         $scope.item.date = $scope.item.date_clear;
         $scope.updateExchangeRate();
@@ -109,37 +109,78 @@ Conta.controller("paymentsEditCtrl", function($scope, $http, Entity, Organisatio
             $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
             $scope.item.type = 'payment';
             Entity.create($scope.item)
-                .success(function (data) {
+                .then((data) => {
                     var entity = {
                         '_id':  data.id,
                         '_rev': data.rev
                     };
                     if ($scope.attachments) {
-                        var uploaded = 0;
-                        angular.forEach($scope.attachments, function(attachment) {
-                            EntityAttachmentUpload.upload(attachment, entity).success(function (data) {
-                                uploaded++;
-                                if (uploaded == $scope.attachments.length)
-                                    $state.go('app.payments');
-                            })
-                        })
+                        EntityAttachmentUpload.upload($scope.attachments, entity).then(() => {
+                            $state.go('app.payments');
+                        });
                     } else {
                         $state.go('app.payments');
                     }
                 })
-                .error(function (data, status) {
+                .catch((data, status) => {
                     if (status == 500)
                         $scope.errors = data;
                 });
         }
     }
-})
+});
 
-Conta.controller("paymentsDeleteCtrl", function($scope, $http, Entity, $state, $stateParams){
+
+angular.module('Conta').controller("paymentsCloneCtrl", function($scope, $http, Entity, Organisation, Currency, ExchangeRates, $state, $stateParams, $controller, EntityAttachmentUpload){
+    $scope.title = 'Edit payment entity';
+    $scope.subtitle = 'Payment';
+    $scope.item_id = $stateParams.entityID;
+    $scope.item = {};
+    Entity.getOne($scope.item_id).then((data) => {
+        $scope.item = data;
+        delete $scope.item._id;
+        delete $scope.item._rev;
+        delete $scope.item._attachments;
+        $scope.item.date = $scope.item.date_clear;
+        $scope.updateExchangeRate();
+    });
+
+    $controller('entityAddCtrl', { $scope: $scope });
+
+    $scope.submit = function(isValid) {
+        if (isValid) {
+            $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
+            $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
+            $scope.item.type = 'payment';
+
+            Entity.create($scope.item)
+                .then((data) => {
+                    var entity = {
+                        '_id': data.id,
+                        '_rev': data.rev
+                    };
+                    if ($scope.attachments) {
+                        EntityAttachmentUpload.upload($scope.attachments, entity).then(() => {
+                            $state.go('app.payments');
+                        });
+                    } else {
+                        $state.go('app.payments');
+                    }
+                    $state.go('app.payments');
+                })
+                .catch((data, status) => {
+                    if (status == 500)
+                        $scope.errors = data;
+                });
+        }
+    }
+});
+
+angular.module('Conta').controller("paymentsDeleteCtrl", function($scope, $http, Entity, $state, $stateParams){
     $scope.item_id = $stateParams.entityID;
 
     Entity.delete($scope.item_id)
-        .success(function(data) {
+        .then((data) => {
             $state.go('app.payments');
         })
 })

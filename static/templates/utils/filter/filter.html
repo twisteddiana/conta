@@ -13,10 +13,10 @@
         <td ng-repeat="filter in filters">
             <div ng-if="filter.type == 'range'">
                 <label class="filter-label">De la</label>
-                <input type="text" class="form-control" ng-if="filter.format == 'date'" ui-mask="99-99-9999" data-ng-model="filter.value.start_key" ui-mask-placeholder ui-mask-placeholder-char="_">
+                <input type="text" class="form-control" ng-if="filter.format == 'date'" ui-mask="99-99-9999" data-ng-model="filter.value.start_key" ui-mask-placeholder ui-mask-placeholder-char="_" model-view-value="true">
                 <input type="number" class="form-control" ng-if="filter.format == 'number'" data-ng-model="filter.value.start_key">
                 <label class="filter-label">Pana la</label>
-                <input type="text" class="form-control" ng-if="filter.format == 'date'" ui-mask="99-99-9999" class="form-control" data-ng-model="filter.value.end_key" ui-mask-placeholder ui-mask-placeholder-char="_">
+                <input type="text" class="form-control" ng-if="filter.format == 'date'" ui-mask="99-99-9999" class="form-control" data-ng-model="filter.value.end_key" ui-mask-placeholder ui-mask-placeholder-char="_" model-view-value="true">
                 <input type="number" class="form-control" ng-if="filter.format == 'number'" data-ng-model="filter.value.end_key">
             </div>
             <div ng-if="filter.type == 'select'">

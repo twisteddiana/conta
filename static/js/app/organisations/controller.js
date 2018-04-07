@@ -1,7 +1,7 @@
 /**
  * Created by Diana on 11/12/2016.
  */
-Conta.controller("organisationsCtrl", function ($scope, $http, $state, Organisation) {
+angular.module('Conta').controller("organisationsCtrl", function ($scope, $http, $state, Organisation) {
     $scope.title = "Organisations";
     $scope.subtitle = "List";
     $scope.filter = {};
@@ -11,7 +11,7 @@ Conta.controller("organisationsCtrl", function ($scope, $http, $state, Organisat
     $scope.direction = 'asc';
     $scope.offset = 0;
 
-    function getListParams() {
+    const getListParams = () => {
         return {
             offset: $scope.offset,
             limit: $scope.limit,
@@ -20,9 +20,9 @@ Conta.controller("organisationsCtrl", function ($scope, $http, $state, Organisat
         }
     }
 
-    function getList() {
+    const getList = () => {
         Organisation.post(getListParams())
-            .success(function(data) {
+            .then(function(data) {
                 $scope.offset = data.offset;
                 $scope.total_rows = data.total_rows;
                 $scope.rows = data.rows;
@@ -32,7 +32,7 @@ Conta.controller("organisationsCtrl", function ($scope, $http, $state, Organisat
 
     getList();
 
-    $scope.changeSort = function(column) {
+    $scope.changeSort = (column) => {
         if ($scope.sort == column) {
             $scope.direction = reverseSort($scope.direction);
         } else {
@@ -43,63 +43,63 @@ Conta.controller("organisationsCtrl", function ($scope, $http, $state, Organisat
         getList();
     }
 
-    function reverseSort(sort) {
+    const reverseSort = (sort) => {
         if (sort == 'asc')
             return 'desc';
         return 'asc';
     }
 
-    $scope.edit = function(id) {;
+    $scope.edit = (id) => {
         $state.go('app.organisations-edit', {organisationID: id})
     };
-    $scope.add = function() {
+    $scope.add = () => {
         $state.go('app.organisations-add');
     };
-    $scope.delete = function(id) {
+    $scope.delete = (id) => {
         $state.go('app.organisations-delete', {organisationID: id})
     };
 
-    $scope.clear_search = function () {
+    $scope.clear_search = () => {
         $scope.search = "";
         $scope.execute_search();
     }
 
-    $scope.range = function(min, max, step){
+    $scope.range = (min, max, step) => {
         step = step || 1;
         var input = [];
         for (var i = min; i <= max; i += step) input.push(i);
         return input;
     };
 
-    $scope.prevPage = function() {
+    $scope.prevPage = () => {
         $scope.page--;
         getList();
 
     }
 
-    $scope.nextPage = function() {
+    $scope.nextPage = () => {
         $scope.page++;
         getList();
     }
 
-    $scope.setPage = function(page) {
+    $scope.setPage = (page) => {
         $scope.page = page;
         getList();
     }
 });
 
 
-Conta.controller("organisationsAddCtrl", function($scope, $http, Organisation, $state){
+angular.module('Conta').controller("organisationsAddCtrl", function ($scope, $http, Organisation, $state) {
     $scope.title = 'Create organisation';
     $scope.subtitle = 'Organisations';
     $scope.item = {};
-    $scope.submit = function(isValid) {
+    $scope.submit = (isValid) => {
         if (isValid) {
             Organisation.create($scope.item)
-                .success(function (data) {
+                .then((data) => {
                     $state.go('app.organisations');
                 })
-                .error(function (data, status) {
+                .catch((data, status) => {
                     if (status == 500)
                         $scope.errors = data;
                 });
@@ -107,30 +107,27 @@ Conta.controller("organisationsAddCtrl", function($scope, $http, Organisation, $
     }
 })
 
-Conta.controller("organisationsEditCtrl", function($scope, $http, Organisation, $state, $stateParams){
+angular.module('Conta').controller("organisationsEditCtrl", function ($scope, $http, Organisation, $state, $stateParams) {
     $scope.title = 'Edit organisation';
     $scope.subtitle = 'Organisations';
     $scope.item_id = $stateParams.organisationID;
-    Organisation.getOne($scope.item_id).success(function(data) {
+    Organisation.getOne($scope.item_id).then((data) => {
         $scope.item = data;
     })
 
     $scope.submit = function(isValid) {
         Organisation.create($scope.item)
-            .success(function(data) {$state.go('app.organisations');
-            })
-            .error(function(data, status) {
-                if (status == 500)
+            .then(() =>  $state.go('app.organisations'))
+            .catch((data, status) => {
+                if (status == 500) {
                     $scope.errors = data;
+                }
             });
     }
 })
 
-Conta.controller("organisationsDeleteCtrl", function($scope, $http, Organisation, $state, $stateParams){
+angular.module('Conta').controller("organisationsDeleteCtrl", function ($scope, $http, Organisation, $state, $stateParams) {
     $scope.item_id = $stateParams.organisationID;
 
-    Organisation.delete($scope.item_id)
-        .success(function(data) {
-            $state.go('app.organisations');
-        })
+    Organisation.delete($scope.item_id).then(() =>  $state.go('app.organisations'));
 })

@@ -1,9 +1,9 @@
 /**
  * Created by Diana on 11/22/2016.
  */
-Conta.factory('Amortization', function($http) {
+angular.module('Conta').factory('Amortization', ($http) => {
     return {
-        post: function (data) {
+        post: (data) =>  {
             if (typeof data == 'undefined')
                 data = {};
 
@@ -15,25 +15,25 @@ Conta.factory('Amortization', function($http) {
             if (typeof data['reduce'] == 'undefined')
                 data['reduce'] = false;
 
-            return $http.post('/amortizations', data);
+            return $http.post('/amortizations', data).then(data => data.data);
         },
-        getOne: function(id) {
+        getOne: (id) =>  {
             var extension = "";
             if (typeof id != 'undefined')
                 extension += "/"+id;
             return $http.get('/amortization' + extension);
         },
-        create: function(data) {
-            return $http.post('/amortization', data);
+        create: (data) =>  {
+            return $http.post('/amortization', data).then(data => data.data);
         },
-        delete: function(id){
-            return $http.delete('/amortization/' + id);
+        delete: (id) => {
+            return $http.delete('/amortization/' + id).then(data => data.data);
         },
         synchronize: function() {
-            return $http.get('/amortizations');
+            return $http.get('/amortizations').then(data => data.data);
         },
-        downloadSheet: function(id) {
-            return $http.get('/amortization/sheet/'+id, {responseType: 'arraybuffer'});
+        downloadSheet: (id) =>  {
+            return $http.get('/amortization/sheet/'+id, {responseType: 'arraybuffer'}).then(data => data.data);
         }
     }
 })

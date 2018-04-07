@@ -2,7 +2,7 @@
  * Created by Diana on 11/22/2016.
  * Some irrelevant change
  */
-Conta.config(function ($stateProvider){
+angular.module('Conta').config(($stateProvider) => {
     $stateProvider
         .state('app.amortizations', {
             url: '^/amortizations',
@@ -15,8 +15,8 @@ Conta.config(function ($stateProvider){
             menu: {
                 tag: 'sidebar',
                 name: 'Mijloace fixe',
-                priority: 200
-            }
+                priority: 200,
+                }
         })
         .state('app.amortizations-edit', {
             url: '^/amortizations/edit/:entityID',

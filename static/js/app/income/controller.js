@@ -1,7 +1,7 @@
 /**
  * Created by Diana on 11/12/2016.
  */
-Conta.controller("incomeCtrl", function ($scope, $http, $state, Entity, $controller, SweetAlert) {
+angular.module('Conta').controller("incomeCtrl", function ($scope, $http, $state, Entity, $controller, SweetAlert) {
     $scope.title = "Incasari";
     $scope.subtitle = "Lista";
 
@@ -39,7 +39,7 @@ Conta.controller("incomeCtrl", function ($scope, $http, $state, Entity, $control
 
 });
 
-Conta.controller("incomeAddCtrl", function($scope, $http, Entity, Currency, Organisation, ExchangeRates, $state, $controller, EntityAttachmentUpload){
+angular.module('Conta').controller("incomeAddCtrl", function ($scope, $http, Entity, Currency, Organisation, ExchangeRates, $state, $controller, EntityAttachmentUpload) {
     $scope.title = 'Add income entity';
     $scope.subtitle = 'Income';
     $scope.item = {};
@@ -55,25 +55,20 @@ Conta.controller("incomeAddCtrl", function($scope, $http, Entity, Currency, Orga
             $scope.item.deductible = 100;
 
             Entity.create($scope.item)
-                .success(function (data) {
+                .then((data) => {
                      var entity = {
                         '_id': data.id,
                         '_rev': data.rev
                     };
                     if ($scope.attachments) {
-                        var uploaded = 0;
-                        angular.forEach($scope.attachments, function(attachment) {
-                            EntityAttachmentUpload.upload(attachment, entity).success(function (data) {
-                                uploaded++;
-                                if (uploaded == $scope.attachments.length)
-                                    $state.go('app.income');
-                            })
-                        })
+                        EntityAttachmentUpload.upload($scope.attachments, entity).then(() => {
+                            $state.go('app.payments');
+                        });
                     } else {
                         $state.go('app.income');
                     }
                 })
-                .error(function (data, status) {
+                .catch((data, status) => {
                     if (status == 500)
                         $scope.errors = data;
                 });
@@ -81,13 +76,13 @@ Conta.controller("incomeAddCtrl", function($scope, $http, Entity, Currency, Orga
     }
 })
 
-Conta.controller("incomeEditCtrl", function($scope, $http, Entity, Organisation, Currency, ExchangeRates, $state, $stateParams, $controller, EntityAttachmentUpload, SweetAlert){
+angular.module('Conta').controller("incomeEditCtrl", function ($scope, $http, Entity, Organisation, Currency, ExchangeRates, $state, $stateParams, $controller, EntityAttachmentUpload, SweetAlert) {
     $scope.title = 'Edit income entity';
     $scope.subtitle = 'Income';
     $scope.entityID = $stateParams.entityID;
     $scope.item = {}
     $scope.attachments = [];
-    Entity.getOne($scope.entityID).success(function(data) {
+    Entity.getOne($scope.entityID).then((data) => {
         $scope.item = data;
         $scope.item.date = $scope.item.date_clear;
         $scope.updateExchangeRate();
@@ -102,25 +97,20 @@ Conta.controller("incomeEditCtrl", function($scope, $http, Entity, Organisation,
             $scope.item.classification = 'Incasare';
             $scope.item.deductible = 100;
             Entity.create($scope.item)
-                .success(function (data) {
+                .then((data) => {
                     var entity = {
                         '_id': $scope.entityID,
-                        '_rev': data.rev
+                        //'_rev': data.rev
                     };
                     if ($scope.attachments.length) {
-                        var uploaded = 0;
-                        angular.forEach($scope.attachments, function(attachment) {
-                            EntityAttachmentUpload.upload(attachment, entity).success(function (data) {
-                                uploaded++;
-                                if (uploaded == $scope.attachments.length)
-                                    $state.go('app.income');
-                            })
-                        })
+                        EntityAttachmentUpload.upload($scope.attachments, entity).then(() => {
+                            $state.go('app.payments');
+                        });
                     } else {
                         $state.go('app.income');
                     }
                 })
-                .error(function (data, status) {
+                .catch((data, status) => {
                     if (status == 500)
                         $scope.errors = data;
                 });
@@ -128,11 +118,11 @@ Conta.controller("incomeEditCtrl", function($scope, $http, Entity, Organisation,
     }
 })
 
-Conta.controller("incomeDeleteCtrl", function($scope, $http, Entity, $state, $stateParams){
+angular.module('Conta').controller("incomeDeleteCtrl", function ($scope, $http, Entity, $state, $stateParams) {
     $scope.item_id = $stateParams.entityID;
 
     Entity.delete($scope.item_id)
-        .success(function(data) {
+        .then((data) => {
             $state.go('app.income');
         })
 })

@@ -48,9 +48,9 @@ class ExpensesUploadHandler(tornado.web.RequestHandler):
 		post_expense = tornado.escape.json_decode(self.get_body_argument("expense"))
 		expense = Expenses()
 		expense.initialise()
-		file_info = self.request.files['file'][0]
-
-		result = yield expense.save_attachment(post_expense, file_info)
+		for file in self.request.files:
+			result = yield expense.save_attachment(post_expense, self.request.files[file][0])
+			post_expense = { '_id': result['id'], '_rev': result['rev'] }
 		self.write(result)
 
 	@gen.coroutine

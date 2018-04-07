@@ -2,7 +2,7 @@
  * Created by Diana on 12/3/2016.
  */
 
-Conta.controller("inventoryListCtrl", function ($scope, $http, $state, Inventory, SweetAlert) {
+angular.module('Conta').controller("inventoryListCtrl", function ($scope, $http, $state, Inventory, SweetAlert) {
 	$scope.title = "Inventar";
 	$scope.subtitle = "Lista";
 
@@ -13,7 +13,7 @@ Conta.controller("inventoryListCtrl", function ($scope, $http, $state, Inventory
 	$scope.skip = 0;
 
 
-	$scope.getListParams = function() {
+	$scope.getListParams = () => {
 		return {
 			design: $scope.design,
 			skip: $scope.skip,
@@ -23,9 +23,9 @@ Conta.controller("inventoryListCtrl", function ($scope, $http, $state, Inventory
 		}
 	}
 
-	$scope.getList = function() {
+	$scope.getList = () => {
 		Inventory.post($scope.getListParams())
-			.success(function (data) {
+			.then(function (data) {
 				$scope.total_rows = data.total_rows;
 				$scope.rows = data.rows;
 				$scope.pages = Math.ceil($scope.total_rows / $scope.limit);
@@ -34,13 +34,13 @@ Conta.controller("inventoryListCtrl", function ($scope, $http, $state, Inventory
 
 	$scope.getList();
 
-	$scope.edit = function(id) {;
+	$scope.edit = (id) => {
 		$state.go('app.inventory-edit', {entityID: id})
 	};
-	$scope.add = function() {
+	$scope.add = () => {
 		$state.go('app.inventory-add');
 	};
-	$scope.delete = function(id) {
+	$scope.delete = (id) => {
 		SweetAlert.swal({
 			title: "Are you sure?",
 			text: "Your will not be able to recover this document!",
@@ -51,17 +51,14 @@ Conta.controller("inventoryListCtrl", function ($scope, $http, $state, Inventory
 			cancelButtonText: "No, cancel plx!",
 			closeOnConfirm: true,
 			closeOnCancel: true
-		}, function(isConfirm){
+		}, (isConfirm) => {
 			if (isConfirm) {
-				$state.go('app.inventory-delete', {entityID: id})
-			} else {
-
-			}
+                $state.go('app.inventory-delete', {entityID: id})
+            }
 		});
-
 	};
 
-	$scope.changeSort = function(column) {
+	$scope.changeSort = (column) => {
 		if ($scope.sort == column) {
 			$scope.direction = reverseSort($scope.direction);
 		} else {
@@ -70,9 +67,9 @@ Conta.controller("inventoryListCtrl", function ($scope, $http, $state, Inventory
 		}
 
 		$scope.getList();
-	}
+	};
 
-	function reverseSort(sort) {
+	const reverseSort = (sort) => {
 		if (sort == 'asc')
 			return 'desc';
 		return 'asc';
@@ -81,38 +78,33 @@ Conta.controller("inventoryListCtrl", function ($scope, $http, $state, Inventory
 
 
 
-Conta.controller("inventoryAddCtrl", function($scope, $http, Inventory, $controller, $state){
+angular.module('Conta').controller("inventoryAddCtrl", function ($scope, $http, Inventory, $controller, $state) {
 	$scope.title = 'Obiect nou';
 	$scope.subtitle = 'Inventar';
 	$scope.item = {};
 
 	$controller('inventoryController', { $scope: $scope });
 
-	$scope.submit = function(isValid) {
+	$scope.submit = (isValid) => {
 		if (isValid) {
 
 			Inventory.create($scope.item)
-				.success(function (data) {
-					var entity = {
-						'_id': data.id,
-						'_rev': data.rev
-					};
-					$state.go('app.inventory');
-				})
-				.error(function (data, status) {
-					if (status == 500)
-						$scope.errors = data;
+				.then((data) => { $state.go('app.inventory') })
+				.catch((data, status) => {
+					if (status == 500) {
+                        $scope.errors = data;
+                    }
 				});
 		}
 	}
 })
 
-Conta.controller("inventoryEditCtrl", function($scope, $http, Inventory, $state, $stateParams, $controller){
+angular.module('Conta').controller("inventoryEditCtrl", function ($scope, $http, Inventory, $state, $stateParams, $controller) {
 	$scope.title = 'Modificare obiect inventar';
 	$scope.subtitle = 'Inventar';
 	$scope.entityID = $stateParams.entityID;
 	$scope.item = {}
-	Inventory.getOne($scope.entityID).success(function(data) {
+	Inventory.getOne($scope.entityID).then((data) => {
 		$scope.item = data;
 		$scope.item.entry_date = $scope.item.entry_date_clear;
 		$scope.item.exit_date = $scope.item.exit_date_clear;
@@ -121,17 +113,13 @@ Conta.controller("inventoryEditCtrl", function($scope, $http, Inventory, $state,
 
 	$controller('inventoryController', { $scope: $scope });
 
-	$scope.submit = function(isValid) {
+	$scope.submit = (isValid) => {
 		if (isValid) {
 			Inventory.create($scope.item)
-				.success(function (data) {
-					var entity = {
-						'_id': data.id,
-						'_rev': data.rev
-					};
+				.then((data) => {
 					$state.go('app.inventory');
-				})
-				.error(function (data, status) {
+                })
+				.catch((data, status) => {
 					if (status == 500)
 						$scope.errors = data;
 				});
@@ -139,10 +127,10 @@ Conta.controller("inventoryEditCtrl", function($scope, $http, Inventory, $state,
 	}
 })
 
-Conta.directive('bindEvent', function() {
+angular.module('Conta').directive('bindEvent', function() {
 	return {
 		restrict: 'EAC',
-		controller: function($scope, $element, $attrs) {
+		controller: ($scope, $element, $attrs) => {
 			$scope.$on('saveLog', function() {
 				console.log('custom event is triggered');
 			});
@@ -151,7 +139,7 @@ Conta.directive('bindEvent', function() {
 });
 
 
-Conta.controller('inventoryController', function($scope, SweetAlert) {
+angular.module('Conta').controller('inventoryController', function ($scope, SweetAlert) {
 	$scope.deleteLog = function(idx) {
 		SweetAlert.swal({
 			title: "Are you sure?",

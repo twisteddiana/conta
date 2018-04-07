@@ -1,7 +1,9 @@
 /**
  * Created by Diana on 11/20/2016.
  */
-Conta.controller("entityController", function ($scope, $http, $state, Entity, $cookies) {
+const utils = require('../utils');
+
+angular.module('Conta').controller("entityController", function ($scope, $http, $state, Entity, $cookies) {
     $scope.filter = {};
     $scope.show_filter = false;
     $scope.filters = {
@@ -27,20 +29,20 @@ Conta.controller("entityController", function ($scope, $http, $state, Entity, $c
         }
     };
 
-    $scope.execute_filter = function() {
+    $scope.execute_filter = () =>  {
         var params = $scope.getListParams();
         params.filter = {};
         $scope.saveCookieFilter();
 
-        angular.forEach($scope.filters, function(filter, filter_name) {
+        angular.forEach($scope.filters, (filter, filter_name) => {
             if (typeof filter.value != 'undefined') {
                 if (filter_name == 'date') {
                     var date_filter = {}
                     if (typeof filter.value.start_key != 'undefined') {
-                        date_filter['start_key'] =  parseDate(filter.value.start_key).getTime() / 1000;
+                        date_filter['start_key'] =  utils.parseDate(filter.value.start_key).getTime() / 1000;
                     }
                     if (typeof filter.value.end_key != 'undefined') {
-                        date_filter['end_key'] =  parseDate(filter.value.end_key).getTime() / 1000;
+                        date_filter['end_key'] =  utils.parseDate(filter.value.end_key).getTime() / 1000;
                     }
                     params.filter[filter_name] = date_filter;
                 } else
@@ -48,22 +50,23 @@ Conta.controller("entityController", function ($scope, $http, $state, Entity, $c
             }
         })
 
-        Entity.post(params).success(function(data) {
+        Entity.post(params).then((data) =>  {
             $scope.skip = data.skip;
             $scope.total_rows = data.total_rows;
             $scope.rows = data.rows;
             $scope.pages = Math.ceil($scope.total_rows/$scope.limit);
+            console.log($scope.pages);
         })
     }
 
-    $scope.display_filter = function() {
+    $scope.display_filter = () =>  {
         $scope.show_filter = !$scope.show_filter;
     }
 
-    $scope.applyCookieFilter = function() {
+    $scope.applyCookieFilter = () =>  {
         var filters = $cookies.getObject('filters');
         if (filters) {
-            angular.forEach(filters, function (value, key) {
+            angular.forEach(filters, (value, key) => {
                 if (typeof $scope.filters[key] != 'undefined') {
                     $scope.filters[key]['value'] = value.value;
                 }
@@ -78,9 +81,7 @@ Conta.controller("entityController", function ($scope, $http, $state, Entity, $c
         $scope.direction = pagination.direction;
         $scope.skip = pagination.skip;
         $scope.show_filter = pagination.show_filter;
-
         $scope.applyCookieFilter();
-
     } else {
         $scope.limit = 50;
         $scope.sort = 'date';
@@ -88,7 +89,7 @@ Conta.controller("entityController", function ($scope, $http, $state, Entity, $c
         $scope.skip = 0;
     }
 
-    $scope.getListParams = function() {
+    $scope.getListParams = () =>  {
         if (!$scope.skip)
             $scope.skip = 0;
         return {
@@ -100,12 +101,12 @@ Conta.controller("entityController", function ($scope, $http, $state, Entity, $c
         }
     }
 
-    $scope.getList = function() {
+    $scope.getList = () =>  {
         if ($scope.show_filter) {
             $scope.execute_filter();
         } else {
             Entity.post($scope.getListParams())
-                .success(function (data) {
+                .then((data) =>  {
                     $scope.total_rows = data.total_rows;
                     $scope.rows = data.rows;
                     $scope.pages = Math.ceil($scope.total_rows / $scope.limit);
@@ -113,7 +114,7 @@ Conta.controller("entityController", function ($scope, $http, $state, Entity, $c
         }
     }
 
-    $scope.changeSort = function(column) {
+    $scope.changeSort = (column) =>  {
         if ($scope.sort == column) {
             $scope.direction = reverseSort($scope.direction);
         } else {
@@ -124,13 +125,13 @@ Conta.controller("entityController", function ($scope, $http, $state, Entity, $c
         $scope.getList();
     }
 
-    function reverseSort(sort) {
+    const reverseSort = (sort) => {
         if (sort == 'asc')
             return 'desc';
         return 'asc';
     }
 
-    $scope.saveCookie =  function() {
+    $scope.saveCookie = () =>  {
         $cookies.putObject('pagination', {
             limit: $scope.limit,
             sort: $scope.sort,
@@ -141,19 +142,19 @@ Conta.controller("entityController", function ($scope, $http, $state, Entity, $c
         });
     }
 
-    $scope.saveCookieFilter = function() {
+    $scope.saveCookieFilter = () =>  {
         $cookies.putObject('filters', $scope.filters);
     }
 
     $scope.$watchGroup(['limit', 'sort', 'direction', 'skip', 'show_filter'], $scope.saveCookie)
 })
 
-Conta.controller("entityAddCtrl", function($scope, $http, Entity, Currency, Organisation, ExchangeRates, $state){
-    $scope.getCurrencies = function() {
-        Currency.get().success(function(data) {
+angular.module('Conta').controller("entityAddCtrl", function ($scope, $http, Entity, Currency, Organisation, ExchangeRates, $state) {
+    $scope.getCurrencies = () =>  {
+        Currency.get().then((data) =>  {
             $scope.currencies = data.rows;
 
-            $scope.currencies.forEach(function(currency) {
+            $scope.currencies.forEach((currency) =>  {
                 if (currency.doc.main) {
                     $scope.item.currency = currency.doc.iso;
                     $scope.main_currency = currency.doc.iso;
@@ -167,13 +168,13 @@ Conta.controller("entityAddCtrl", function($scope, $http, Entity, Currency, Orga
     $scope.$watch('item.date', $scope.updateExchangeRate);
     $scope.$watch('item.currency', $scope.updateExchangeRate);
 
-    $scope.updateExchangeRate = function() {
-        if ($scope.item.date && !isValidDate($scope.item.date)) {
+    $scope.updateExchangeRate = () =>  {
+        if ($scope.item.date && !utils.isValidDate($scope.item.date)) {
             $scope.item.date = '';
         }
 
         if ($scope.item.currency != $scope.main_currency && $scope.item.date) {
-            ExchangeRates.get($scope.item.currency, $scope.item.date).success(function (data) {
+            ExchangeRates.get($scope.item.currency, $scope.item.date).then((data) =>  {
                 $scope.exchange_rate = data.rows[0].value;
             });
         } else {
@@ -181,8 +182,8 @@ Conta.controller("entityAddCtrl", function($scope, $http, Entity, Currency, Orga
         }
     }
 
-    $scope.getOrganisations = function() {
-        Organisation.get('name').success(function(data) {
+    $scope.getOrganisations = () =>  {
+        Organisation.get('name').then((data) =>  {
             $scope.organisations = data.rows;
         })
     }

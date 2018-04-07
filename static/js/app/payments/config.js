@@ -1,7 +1,7 @@
 /**
  * Created by Diana on 11/12/2016.
  */
-Conta.config(function ($stateProvider){
+angular.module('Conta').config(function ($stateProvider){
     $stateProvider
         .state('app.payments', {
             url: '^/payments',
@@ -32,6 +32,14 @@ Conta.config(function ($stateProvider){
             },
             templateUrl: 'static/templates/components/payments/form.html',
             controller: 'paymentsAddCtrl'
+        })
+        .state('app.payments-clone', {
+            url: '^/payments/clone/:entityID',
+            data: {
+                displayName: 'Clone payment entity'
+            },
+            templateUrl: 'static/templates/components/payments/form.html',
+            controller: 'paymentsCloneCtrl'
         })
         .state('app.payments-delete', {
             url: '^/payments/delete/:entityID',

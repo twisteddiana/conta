@@ -1,7 +1,7 @@
 /**
  * Created by Diana on 11/22/2016.
  */
-Conta.controller("amortizationsCtrl", function ($scope, $http, $state, Amortization, SweetAlert) {
+angular.module('Conta').controller("amortizationsCtrl", function ($scope, $http, $state, Amortization, SweetAlert) {
 	$scope.title = "Mijloace fixe";
 	$scope.subtitle = "Lista";
 
@@ -12,7 +12,7 @@ Conta.controller("amortizationsCtrl", function ($scope, $http, $state, Amortizat
 	$scope.skip = 0;
 
 
-	$scope.getListParams = function() {
+	$scope.getListParams = () => {
 		return {
 			design: $scope.design,
 			skip: $scope.skip,
@@ -22,9 +22,9 @@ Conta.controller("amortizationsCtrl", function ($scope, $http, $state, Amortizat
 		}
 	}
 
-	$scope.getList = function() {
+	$scope.getList = () => {
 		Amortization.post($scope.getListParams())
-			.success(function (data) {
+			.then((data) => {
 				$scope.total_rows = data.total_rows;
 				$scope.rows = data.rows;
 				$scope.pages = Math.ceil($scope.total_rows / $scope.limit);
@@ -33,16 +33,16 @@ Conta.controller("amortizationsCtrl", function ($scope, $http, $state, Amortizat
 
 	$scope.getList();
 
-	$scope.edit = function(id) {;
+	$scope.edit = (id) => {
 		$state.go('app.amortizations-edit', {entityID: id})
 	};
-	$scope.add = function() {
+	$scope.add = () => {
 		$state.go('app.amortizations-add');
 	};
-	$scope.view = function(id) {
+	$scope.view = (id) => {
 		$state.go('app.amortizations-view', {entityID: id});
 	};
-	$scope.delete = function(id) {
+	$scope.delete = (id) => {
 		SweetAlert.swal({
 			title: "Are you sure?",
 			text: "Your will not be able to recover this document!",
@@ -53,17 +53,15 @@ Conta.controller("amortizationsCtrl", function ($scope, $http, $state, Amortizat
 			cancelButtonText: "No, cancel plx!",
 			closeOnConfirm: true,
 			closeOnCancel: true
-		}, function(isConfirm){
+		}, (isConfirm) => {
 			if (isConfirm) {
 				$state.go('app.amortizations-delete', {entityID: id})
-			} else {
-
 			}
 		});
 
 	};
 
-	$scope.changeSort = function(column) {
+	$scope.changeSort = (column) => {
 		if ($scope.sort == column) {
 			$scope.direction = reverseSort($scope.direction);
 		} else {
@@ -74,22 +72,22 @@ Conta.controller("amortizationsCtrl", function ($scope, $http, $state, Amortizat
 		$scope.getList();
 	}
 
-	function reverseSort(sort) {
+	const reverseSort = (sort) => {
 		if (sort == 'asc')
 			return 'desc';
 		return 'asc';
 	}
 
 	$scope.synchronizing = false;
-	$scope.synchronizePayments = function() {
+	$scope.synchronizePayments = () => {
 		$scope.synchronizing = true;
-		Amortization.synchronize().success(function(data) {
+		Amortization.synchronize().then((data) => {
 			$scope.synchronizing = false;
 		})
 	}
 
-	$scope.downloadSheet = function(item) {
-		Amortization.downloadSheet(item.id).success(function(data){
+	$scope.downloadSheet = (item) => {
+		Amortization.downloadSheet(item.id).then((data) => {
 			var blob = new Blob([data], {type: 'application/pdf'})
 			var url = URL.createObjectURL(blob);
 
@@ -107,17 +105,17 @@ Conta.controller("amortizationsCtrl", function ($scope, $http, $state, Amortizat
 });
 
 
-Conta.controller("amortizationsAddCtrl", function($scope, $http, Amortization, Currency, ExchangeRates, $state){
+angular.module('Conta').controller("amortizationsAddCtrl", function ($scope, $http, Amortization, Currency, ExchangeRates, $state) {
 	$scope.title = 'Noua amortizare';
 	$scope.subtitle = 'Amortizari';
 	$scope.item = {};
 	$scope.currencies = [];
 
-	$scope.getCurrencies = function() {
-		Currency.get().success(function(data) {
+	$scope.getCurrencies = () => {
+		Currency.get().then((data) => {
 			$scope.currencies = data.rows;
 
-			$scope.currencies.forEach(function(currency) {
+			$scope.currencies.forEach((currency) => {
 				if (currency.doc.main) {
 					$scope.item.currency = currency.doc.iso;
 					$scope.main_currency = currency.doc.iso;
@@ -128,40 +126,39 @@ Conta.controller("amortizationsAddCtrl", function($scope, $http, Amortization, C
 	}
 	$scope.getCurrencies();
 
-	$scope.submit = function(isValid) {
+	$scope.submit = (isValid) => {
 		if (isValid) {
 			$scope.item.type = 'object';
 
 			Amortization.create($scope.item)
-				.success(function (data) {
+				.then((data) => {
 					var entity = {
 						'_id': data.id,
 						'_rev': data.rev
 					};
 					$state.go('app.amortizations');
 				})
-				.error(function (data, status) {
+				.catch((data, status) => {
 					if (status == 500)
 						$scope.errors = data;
 				});
 		}
 	}
-})
+});
 
-
-Conta.controller("amortizationsViewCtrl", function($scope, $http, Amortization, Currency, ExchangeRates, $state, $stateParams){
+angular.module('Conta').controller("amortizationsViewCtrl", function ($scope, $http, Amortization, Currency, ExchangeRates, $state, $stateParams) {
 	$scope.title = 'Transe Amortizare';
 	$scope.subtitle = 'Income';
 	$scope.entityID = $stateParams.entityID;
-	$scope.item = {}
-	Amortization.getOne($scope.entityID).success(function(data) {
+	$scope.item = {};
+	Amortization.getOne($scope.entityID).then((data) => {
 		$scope.item = data;
 		$scope.subtitle = $scope.item.name;
 
 		$scope.getList();
-	})
+	});
 
-	$scope.getListParams = function() {
+	$scope.getListParams = () => {
 		return {
 			design: 'installments',
 			skip: 0,
@@ -171,25 +168,23 @@ Conta.controller("amortizationsViewCtrl", function($scope, $http, Amortization, 
 			start_key: [$scope.item._id],
 			reduce: false
 		}
-	}
+	};
 
-	$scope.getList = function() {
+	$scope.getList = () => {
 		Amortization.post($scope.getListParams())
-			.success(function (data) {
+			.then((data) => {
 				$scope.total_rows = data.total_rows;
 				$scope.rows = data.rows;
-			})
-	}
-})
+			});
+	};
+});
 
-
-
-Conta.controller("amortizationsEditCtrl", function($scope, $http, Amortization, Currency, ExchangeRates, $state, $stateParams){
+angular.module('Conta').controller("amortizationsEditCtrl", function ($scope, $http, Amortization, Currency, ExchangeRates, $state, $stateParams) {
 	$scope.title = 'Modificare';
 	$scope.subtitle = 'Amortizari';
 	$scope.entityID = $stateParams.entityID;
-	$scope.item = {}
-	Amortization.getOne($scope.entityID).success(function(data) {
+	$scope.item = {};
+	Amortization.getOne($scope.entityID).then((data) => {
 		$scope.item = data;
 		$scope.item.date = $scope.item.date_clear;
 		$scope.subtitle = $scope.item.name;
@@ -197,11 +192,11 @@ Conta.controller("amortizationsEditCtrl", function($scope, $http, Amortization, 
 
 	$scope.currencies = [];
 
-	$scope.getCurrencies = function() {
-		Currency.get().success(function(data) {
+	$scope.getCurrencies = () => {
+		Currency.get().then((data) => {
 			$scope.currencies = data.rows;
 
-			$scope.currencies.forEach(function(currency) {
+			$scope.currencies.forEach((currency) => {
 				if (currency.doc.main) {
 					$scope.item.currency = currency.doc.iso;
 					$scope.main_currency = currency.doc.iso;
@@ -212,8 +207,8 @@ Conta.controller("amortizationsEditCtrl", function($scope, $http, Amortization, 
 	}
 	$scope.getCurrencies();
 
-	$scope.downloadSheet = function() {
-		Amortization.downloadSheet($scope.item._id).success(function(data){
+	$scope.downloadSheet = () => {
+		Amortization.downloadSheet($scope.item._id).then((data) => {
 			var blob = new Blob([data], {type: 'application/pdf'})
 			var url = URL.createObjectURL(blob);
 
@@ -226,24 +221,20 @@ Conta.controller("amortizationsEditCtrl", function($scope, $http, Amortization, 
 			hiddenElement.click();
 			hiddenElement.remove();
 		})
-	}
+	};
 
-	$scope.submit = function(isValid) {
+	$scope.submit = (isValid) => {
 		if (isValid) {
 			$scope.item.type = 'object';
 
 			Amortization.create($scope.item)
-				.success(function (data) {
-					var entity = {
-						'_id': data.id,
-						'_rev': data.rev
-					};
+				.then(() => {
 					$state.go('app.amortizations');
 				})
-				.error(function (data, status) {
+				.catch((data, status) => {
 					if (status == 500)
 						$scope.errors = data;
 				});
 		}
 	}
-})
+});

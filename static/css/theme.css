@@ -1,7 +1,6 @@
 html, body {
     font-family: "Exo 2";
-    height: 100%;
-    background: #e9ecf3;
+    background-color: #e9ecf3 !important;
     font-size: 13px;
 }
 h1 {
@@ -18,37 +17,46 @@ a {
     color:#3B3F51;
 }
 
-#wrap {
-    height:100%;
-}
-
 .header {
-    height:70px;
     background: #3B3F51;
     color: #fff;
     position: fixed;
     z-index: 1;
+    width: calc(100vw - 15px);
+    height: 70px;
 }
 
-.content_weapper {
+.header h1 {
+    margin-left: 15px;
+    line-height: 70px;
+    margin-bottom: 0;
+}
+
+.content_wrapper {
     margin-top: 70px;
 }
 
 .page-header {
-    position: fixed;
+    position: fixed !important;
+    top: 45px;
     z-index: 3;
-    top:0;
     color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+    background: white;
+    width: calc(100vw - 265px);
+    padding: 20px 15px 20px;
 }
 
 .page-header h2 {
-    margin-top: 18px;
-    margin-bottom: 18px;
+    color: black;
+    margin-bottom: 0;
 }
 
 .page-header .toolbar {
-    float: right;
-    padding: 18px 0;
+
 }
 
 .page-header .toolbar .search {
@@ -66,25 +74,25 @@ a {
 
 .side-menu {
     height: calc(100% - 50px);
-    float: left;
     padding-top: 30px;
     padding-bottom: 30px;
+    position: fixed;
+    width: 250px;
 }
 
 .content {
-    margin-left: 16.666667%;
     overflow: hidden;
     position: relative;
     min-height: 100%;
-    padding-top: 30px;
     padding-bottom: 30px;
-
+    margin-top: 60px;
+    margin-left: 250px;
 }
 
 .box {
     background: #fff;
-    padding: 15px;
     margin-bottom: 30px;
+    padding: 15px;
 }
 
 .table-list {
@@ -363,16 +371,11 @@ ul.pagination {
 }
 
 .box .box-heading {
-    margin-top: -15px;
-    margin-left: -15px;
-    margin-right: -15px;
-    margin-bottom: 20px;
-
     background: #5b9bd1;
     color:#fff;
     padding: 15px;
     font-weight: 500;
-
+    margin-bottom: 15px;
 }
 
 .page-item.active .page-link, .page-item.active .page-link:focus, .page-item.active .page-link:hover {
@@ -386,4 +389,8 @@ ul.pagination {
 
 .form-control-medium {
     width: 120px !important;
+}
+
+.clearfix {
+    clear: both;
 }

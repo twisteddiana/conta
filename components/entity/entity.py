@@ -249,9 +249,19 @@ class Entity:
 		social_payments = round(social_payments, 2)
 		net_income = round(brut_income - payments, 2)
 
-		medical_insurance = round((net_income - untaxable_income) * 5.5/100, 2)
-		pension = round((net_income - untaxable_income) * 10.5/100, 2)
-		income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 16/100, 2)
+		if query['year'] <= '2015':
+			medical_insurance = round((net_income - untaxable_income) * 5.5/100, 2)
+			pension = round((net_income - untaxable_income) * 10.5/100, 2)
+			income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 16/100, 2)
+		elif query['year'] == '2017':
+			medical_insurance = round((net_income - untaxable_income) * 5.5 / 100, 2)
+			pension = 1176
+			income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 16 / 100, 2)
+		elif query['year'] == '2018':
+			base = 1900
+			medical_insurance = round(base * 12 * 10 / 100, 2)
+			pension = round(base * 12 * 25 / 100, 2)
+			income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 10 / 100, 2)
 
 		return {
 			'brut_income': brut_income,
@@ -341,7 +351,7 @@ class ExchangeRate:
 		for cube in root[1].findall('{http://www.bnr.ro/xsd}Cube'):
 			dict = cube.attrib
 			dict['date'] = str(int(time.mktime(datetime.strptime(dict['date'], '%Y-%m-%d').timetuple())))
-			dict['iso'] = 'EUR'
+			dict['iso'] = iso
 
 			for rate in cube.findall('{http://www.bnr.ro/xsd}Rate'):
 				if rate.attrib['currency'] == iso:

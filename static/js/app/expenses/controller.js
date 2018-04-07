@@ -1,7 +1,7 @@
 /**
  * Created by Diana on 5/1/2017.
  */
-Conta.controller("expensesCtrl", function ($scope, $http, $state, Expenses, SweetAlert) {
+angular.module('Conta').controller("expensesCtrl", function ($scope, $http, $state, Expenses, SweetAlert) {
 	$scope.title = "Cheltuieli";
 	$scope.subtitle = "Lista";
 
@@ -12,7 +12,7 @@ Conta.controller("expensesCtrl", function ($scope, $http, $state, Expenses, Swee
 	$scope.skip = 0;
 
 
-	$scope.getListParams = function() {
+	$scope.getListParams = () => {
 		return {
 			design: $scope.design,
 			skip: $scope.skip,
@@ -22,9 +22,9 @@ Conta.controller("expensesCtrl", function ($scope, $http, $state, Expenses, Swee
 		}
 	}
 
-	$scope.getList = function() {
+	$scope.getList = () => {
 		Expenses.post($scope.getListParams())
-			.success(function (data) {
+			.then((data) => {
 				$scope.total_rows = data.total_rows;
 				$scope.rows = data.rows;
 				$scope.pages = Math.ceil($scope.total_rows / $scope.limit);
@@ -33,16 +33,16 @@ Conta.controller("expensesCtrl", function ($scope, $http, $state, Expenses, Swee
 
 	$scope.getList();
 
-	$scope.edit = function(id) {;
+	$scope.edit = (id) => {;
 		$state.go('app.expenses-edit', {entityID: id})
 	};
-	$scope.add = function() {
+	$scope.add = () => {
 		$state.go('app.expenses-add');
 	};
-	$scope.view = function(id) {
+	$scope.view = (id) => {
 		$state.go('app.expenses-view', {entityID: id});
 	};
-	$scope.delete = function(id) {
+	$scope.delete = (id) => {
 		SweetAlert.swal({
 			title: "Are you sure?",
 			text: "Your will not be able to recover this document!",
@@ -53,7 +53,7 @@ Conta.controller("expensesCtrl", function ($scope, $http, $state, Expenses, Swee
 			cancelButtonText: "No, cancel plx!",
 			closeOnConfirm: true,
 			closeOnCancel: true
-		}, function(isConfirm){
+		}, (isConfirm) =>{
 			if (isConfirm) {
 				$state.go('app.expenses-delete', {entityID: id})
 			} else {
@@ -63,7 +63,7 @@ Conta.controller("expensesCtrl", function ($scope, $http, $state, Expenses, Swee
 
 	};
 
-	$scope.changeSort = function(column) {
+	$scope.changeSort = (column) => {
 		if ($scope.sort == column) {
 			$scope.direction = reverseSort($scope.direction);
 		} else {
@@ -81,8 +81,8 @@ Conta.controller("expensesCtrl", function ($scope, $http, $state, Expenses, Swee
 	}
 
 
-	$scope.downloadSheet = function(item) {
-		Expenses.downloadSheet(item.id).success(function(data){
+	$scope.downloadSheet = (item) => {
+		Expenses.downloadSheet(item.id).then((data) =>{
 			var blob = new Blob([data], {type: 'application/pdf'})
 			var url = URL.createObjectURL(blob);
 
@@ -99,7 +99,7 @@ Conta.controller("expensesCtrl", function ($scope, $http, $state, Expenses, Swee
 
 });
 
-Conta.controller("expensesAddCtrl", function($scope, $http, Expenses, Currency, ExchangeRates, $state, Organisation, ExpensesAttachmentUpload){
+angular.module('Conta').controller("expensesAddCtrl", function ($scope, $http, Expenses, Currency, ExchangeRates, $state, Organisation, ExpensesAttachmentUpload) {
 	$scope.title = 'Noua cheltuiala';
 	$scope.subtitle = 'Cheltuieli';
 	$scope.item = {
@@ -107,11 +107,11 @@ Conta.controller("expensesAddCtrl", function($scope, $http, Expenses, Currency, 
 	};
 	$scope.currencies = [];
 
-	$scope.getCurrencies = function() {
-		Currency.get().success(function(data) {
+	$scope.getCurrencies = () => {
+		Currency.get().then((data) => {
 			$scope.currencies = data.rows;
 
-			$scope.currencies.forEach(function(currency) {
+			$scope.currencies.forEach((currency) => {
 				if (currency.doc.main) {
 					$scope.item.currency = currency.doc.iso;
 					$scope.main_currency = currency.doc.iso;
@@ -122,58 +122,53 @@ Conta.controller("expensesAddCtrl", function($scope, $http, Expenses, Currency, 
 	}
 	$scope.getCurrencies();
 
-	$scope.getOrganisations = function() {
-        Organisation.get('name').success(function(data) {
+	$scope.getOrganisations = () => {
+        Organisation.get('name').then((data) => {
             $scope.organisations = data.rows;
         })
     }
 
     $scope.getOrganisations();
 
-	$scope.addSubitem = function() {
+	$scope.addSubitem = () => {
 		$scope.item.items.push({'deductible': 25});
 	}
 
-	$scope.delSubitem = function(index) {
+	$scope.delSubitem = (index) => {
 		$scope.item.items.splice(index, 1);
 	}
 
-	$scope.$watch('item.items', function() {
+	$scope.$watch('item.items', () => {
 		$scope.item.amount = 0;
 		$scope.item.deductible_amount = 0;
-		angular.forEach($scope.item.items, function(item) {
+		angular.forEach($scope.item.items, (item) => {
 			$scope.item.amount += item.amount;
 			item.deductible_amount = item.amount * parseFloat(item.deductible) / 100;
 			$scope.item.deductible_amount += item.deductible_amount;
 		})
 	}, true)
 
-	$scope.submit = function(isValid) {
+	$scope.submit = (isValid) => {
 		if (isValid) {
 			$scope.item.type = 'object';
 
 			Expenses.create($scope.item)
-				.success(function (data) {
+				.then((data) => {
 					var expense = {
 						'_id': data.id,
 						'_rev': data.rev
 					};
 
 					if ($scope.attachments) {
-                        var uploaded = 0;
-                        angular.forEach($scope.attachments, function(attachment) {
-                            ExpensesAttachmentUpload.upload(attachment, expense).success(function (data) {
-                                uploaded++;
-                                if (uploaded == $scope.attachments.length)
-                                    $state.go('app.expenses');
-                            })
-                        })
+                        ExpensesAttachmentUpload.upload($scope.attachments, expense).then(() => {
+                            $state.go('app.expenses');
+                        });
                     } else {
                         $state.go('app.expenses');
                     }
 
 				})
-				.error(function (data, status) {
+				.catch((data, status) => {
 					if (status == 500)
 						$scope.errors = data;
 				});
@@ -182,12 +177,12 @@ Conta.controller("expensesAddCtrl", function($scope, $http, Expenses, Currency, 
 })
 
 
-Conta.controller("expensesEditCtrl", function($scope, $http, Expenses, Currency, ExchangeRates, $state, $stateParams, ExpensesAttachmentUpload, Organisation){
+angular.module('Conta').controller("expensesEditCtrl", function ($scope, $http, Expenses, Currency, ExchangeRates, $state, $stateParams, ExpensesAttachmentUpload, Organisation) {
 	$scope.title = 'Modificare';
 	$scope.subtitle = 'Cheltuieli';
 	$scope.entityID = $stateParams.entityID;
 	$scope.item = {}
-	Expenses.getOne($scope.entityID).success(function(data) {
+	Expenses.getOne($scope.entityID).then((data) => {
 		$scope.item = data;
 		$scope.item.date = $scope.item.date_clear;
 		$scope.subtitle = $scope.item.name;
@@ -195,11 +190,11 @@ Conta.controller("expensesEditCtrl", function($scope, $http, Expenses, Currency,
 
 	$scope.currencies = [];
 
-	$scope.getCurrencies = function() {
-		Currency.get().success(function(data) {
+	$scope.getCurrencies = () => {
+		Currency.get().then((data) => {
 			$scope.currencies = data.rows;
 
-			$scope.currencies.forEach(function(currency) {
+			$scope.currencies.forEach((currency) => {
 				if (currency.doc.main) {
 					$scope.item.currency = currency.doc.iso;
 					$scope.main_currency = currency.doc.iso;
@@ -210,34 +205,34 @@ Conta.controller("expensesEditCtrl", function($scope, $http, Expenses, Currency,
 	}
 	$scope.getCurrencies();
 
-	$scope.getOrganisations = function() {
-        Organisation.get('name').success(function(data) {
+	$scope.getOrganisations = () => {
+        Organisation.get('name').then((data) => {
             $scope.organisations = data.rows;
         })
     }
 
     $scope.getOrganisations();
 
-	$scope.addSubitem = function() {
+	$scope.addSubitem = () => {
 		$scope.item.items.push({'deductible': 25});
 	}
 
-	$scope.delSubitem = function(index) {
+	$scope.delSubitem = (index) => {
 		$scope.item.items.splice(index, 1);
 	}
 
-	$scope.$watch('item.items', function() {
+	$scope.$watch('item.items', () => {
 		$scope.item.amount = 0;
 		$scope.item.deductible_amount = 0;
-		angular.forEach($scope.item.items, function(item) {
+		angular.forEach($scope.item.items, (item) => {
 			$scope.item.amount += item.amount;
 			item.deductible_amount = item.amount * parseFloat(item.deductible) / 100;
 			$scope.item.deductible_amount += item.deductible_amount;
 		})
 	}, true)
 
-	$scope.downloadSheet = function() {
-		Expenses.downloadSheet($scope.item._id).success(function(data){
+	$scope.downloadSheet = () => {
+		Expenses.downloadSheet($scope.item._id).then((data) =>{
 			var blob = new Blob([data], {type: 'application/pdf'})
 			var url = URL.createObjectURL(blob);
 
@@ -252,34 +247,40 @@ Conta.controller("expensesEditCtrl", function($scope, $http, Expenses, Currency,
 		})
 	}
 
-	$scope.submit = function(isValid) {
+	$scope.submit = (isValid) => {
 		if (isValid) {
 			$scope.item.type = 'object';
 
 			Expenses.create($scope.item)
-				.success(function (data) {
+				.then((data) => {
 					var expense = {
 						'_id': data.id,
 						'_rev': data.rev
 					};
 					//$state.go('app.expenses');
                     if ($scope.attachments) {
-                        var uploaded = 0;
-                        angular.forEach($scope.attachments, function(attachment) {
-                            ExpensesAttachmentUpload.upload(attachment, expense).success(function (data) {
-                                uploaded++;
-                                if (uploaded == $scope.attachments.length)
-                                    $state.go('app.expenses');
-                            })
-                        })
+                        ExpensesAttachmentUpload.upload($scope.attachments, expense).then(() => {
+                            $state.go('app.expenses');
+                        });
                     } else {
                         $state.go('app.expenses');
                     }
 				})
-				.error(function (data, status) {
+				.catch((data, status) => {
 					if (status == 500)
 						$scope.errors = data;
 				});
 		}
 	}
+});
+
+
+
+angular.module('Conta').controller("expensesDeleteCtrl", function($scope, $http, Expenses, $state, $stateParams){
+    $scope.item_id = $stateParams.entityID;
+
+    Expenses.delete($scope.item_id)
+        .then((data) => {
+            $state.go('app.expenses');
+        })
 })

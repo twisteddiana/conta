@@ -2,7 +2,7 @@
  * Created by Diana on 11/12/2016.
  */
 
-Conta.config(['$httpProvider', function ($httpProvider) {
+angular.module('Conta').config(['$httpProvider', ($httpProvider) =>  {
     //Reset headers to avoid OPTIONS request (aka preflight)
     $httpProvider.defaults.headers.common = {};
     $httpProvider.defaults.headers.post = {};
@@ -13,9 +13,9 @@ Conta.config(['$httpProvider', function ($httpProvider) {
 }]);
 
 angular.module('Conta').run(['$state', '$stateParams', '$rootScope',
-    function($state, $stateParams, $rootScope) {
+    ($state, $stateParams, $rootScope) => {
         $rootScope.$on("$stateChangeError", console.log.bind(console));
-        $rootScope.$on('$stateChangeSuccess', function(ev, to, toParams, from, fromParams) {
+        $rootScope.$on('$stateChangeSuccess', (ev, to, toParams, from, fromParams) => {
             $rootScope.previousState = from.name;
             $rootScope.currentState = to.name;
             $rootScope.$broadcast('changeState');

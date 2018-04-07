@@ -1,102 +1,109 @@
-<form ng-submit="submit(inventoryForm.$valid)" novalidate name="inventoryForm">
-    <div class="page-header col-lg-10">
-        <div class="toolbar">
-            <div class="text-right">
-                <button class="btn btn-success" ng-disabled="inventoryForm.$invalid">
-                    <i class="fa fa-check"></i> Save
-                </button>
+<form ng-submit="submit(inventoryForm.$valid)" novalidate name="inventoryForm" class="col-12">
+    <div class="row">
+        <div class="page-header">
+            <div class="toolbar">
+                <div class="text-right">
+                    <button class="btn btn-success" ng-disabled="inventoryForm.$invalid">
+                        <i class="fa fa-check"></i> Save
+                    </button>
+                </div>
             </div>
+            <h2>{{title}} <span>{{subtitle}}</span></h2>
         </div>
-        <h2>{{title}} <span>{{subtitle}}</span></h2>
-    </div>
-    <div class="col-lg-4">
-        <div class="box">
-            <div class="form-group row">
-                <div class="col-lg-3">
-                    <label class="form-control-label">Name</label>
-                </div>
-                <div class="col-lg-9">
-                    <input type="text" class="form-control" required ng-required="{string}" data-ng-model="item.name" name="name" value="item.name">
-                </div>
-            </div>
-        </div>
-        <div class="box">
-            <div class="form-group row">
-                <div class="col-lg-3">
-                    <label class="form-control-label">Data intrare</label>
-                </div>
-                <div class="col-lg-9">
-                    <input type="text" class="form-control" ui-mask="99-99-9999" required ng-required="{string}" data-ng-model="item.entry_date" name="entry_date" value="item.entry_date">
+        <div class="col-lg-4">
+            <div class="box">
+                <div class="form-group row">
+                    <div class="col-lg-3">
+                        <label class="form-control-label">Name</label>
+                    </div>
+                    <div class="col-lg-9">
+                        <input type="text" class="form-control" required ng-required="{string}" data-ng-model="item.name" name="name" value="item.name">
+                    </div>
                 </div>
             </div>
-            <div class="form-group row">
-                <div class="col-lg-3">
-                    <label class="form-control-label">Data iesire</label>
+            <div class="box">
+                <div class="form-group row">
+                    <div class="col-lg-3">
+                        <label class="form-control-label">Data intrare</label>
+                    </div>
+                    <div class="col-lg-9">
+                        <input type="text" class="form-control" ui-mask="99-99-9999" required ng-required="{string}" data-ng-model="item.entry_date" name="entry_date" value="item.entry_date">
+                    </div>
                 </div>
-                <div class="col-lg-9">
-                    <input type="text" class="form-control" ui-mask="99-99-9999" data-ng-model="item.exit_date" name="exit_date" value="item.exit_date">
+                <div class="form-group row">
+                    <div class="col-lg-3">
+                        <label class="form-control-label">Data iesire</label>
+                    </div>
+                    <div class="col-lg-9">
+                        <input type="text" class="form-control" ui-mask="99-99-9999" data-ng-model="item.exit_date" name="exit_date" value="item.exit_date">
+                    </div>
                 </div>
-            </div>
-            <div class="form-group row">
-                <div class="col-lg-3">
-                    <label class="form-control-label">Valoare intrare</label>
-                </div>
-                <div class="col-lg-9">
-                    <div class="input-group">
-                        <div class="input-group-addon">RON</div>
-                        <input type="text" class="form-control" data-ng-model="item.entry_value" value="item.entry_value">
+                <div class="form-group row">
+                    <div class="col-lg-3">
+                        <label class="form-control-label">Valoare intrare</label>
+                    </div>
+                    <div class="col-lg-9">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">RON</div>
+                            </div>
+                            <input type="text" class="form-control" data-ng-model="item.entry_value" value="item.entry_value">
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-8">
-        <div class="box">
-            <h3>Intrari inventar</h3>
-            <table class="table-list">
-                <thead>
-                <tr>
-                    <th>Anul</th>
-                    <th>Valoare contabila</th>
-                    <th>Valoare inventar</th>
-                    <th>Diferenta</th>
-                    <th>Descriere</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr  ng-repeat="log in item.logs">
-                    <td>
-                        <input type="text" data-ng-model="log.year" value="{{log.year}}" class="form-control form-control-small">
-                    </td>
-                    <td>
-                        <div class="input-group">
-                            <div class="input-group-addon">RON</div>
-                            <input type="text" data-ng-model="log.value" class="form-control form-control-medium" value="{{log.value}}">
-                        </div>
-                    </td>
-                    <td>
-                        <div class="input-group">
-                            <div class="input-group-addon">RON</div>
-                            <input type="text" data-ng-model="log.inventory_value" class="form-control form-control-medium" value="{{log.inventory_value}}">
-                        </div>
-                    </td>
-                    <td>
-                        {{log.value - log.inventory_value}}
-                    </td>
-                    <td>
-                        <textarea class="form-control" data-ng-model="log.description">{{log.description}}</textarea>
-                    </td>
-                    <td>
-                        <div class="btn-group-sm">
-                            <button type='button' class="btn btn-danger" ng-click="deleteLog($index)" ng-hide="log.editing">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-                <tfoot>
+        <div class="col-lg-8">
+            <div class="box">
+                <h3>Intrari inventar</h3>
+                <table class="table-list">
+                    <thead>
+                    <tr>
+                        <th>Anul</th>
+                        <th>Valoare contabila</th>
+                        <th>Valoare inventar</th>
+                        <th>Diferenta</th>
+                        <th>Descriere</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr  ng-repeat="log in item.logs">
+                        <td>
+                            <input type="text" data-ng-model="log.year" value="{{log.year}}" class="form-control form-control-small">
+                        </td>
+                        <td>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">RON</div>
+                                </div>
+                                <input type="text" data-ng-model="log.value" class="form-control form-control-medium" value="{{log.value}}">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">RON</div>
+                                </div>
+                                <input type="text" data-ng-model="log.inventory_value" class="form-control form-control-medium" value="{{log.inventory_value}}">
+                            </div>
+                        </td>
+                        <td>
+                            {{log.value - log.inventory_value}}
+                        </td>
+                        <td>
+                            <textarea class="form-control" data-ng-model="log.description">{{log.description}}</textarea>
+                        </td>
+                        <td>
+                            <div class="btn-group-sm">
+                                <button type='button' class="btn btn-danger" ng-click="deleteLog($index)" ng-hide="log.editing">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
                     <tr>
                         <td colspan="6" class="text-lg-right">
                             <button type="button" class="btn btn-green" ng-click="addLog()">
@@ -104,9 +111,9 @@
                             </button>
                         </td>
                     </tr>
-                </tfoot>
-            </table>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
-
 </form>

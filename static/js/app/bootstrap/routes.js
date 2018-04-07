@@ -2,7 +2,7 @@
  * Created by Diana on 11/12/2016.
  */
 
-Conta.config(function ($stateProvider){
+angular.module('Conta').config(($stateProvider) => {
     $stateProvider
         .state('app', {
             abstract: true,

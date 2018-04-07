@@ -1,7 +1,7 @@
 /**
  * Created by Diana on 12/3/2016.
  */
-Conta.config(function ($stateProvider){
+angular.module('Conta').config(function ($stateProvider){
     $stateProvider
         .state('app.inventory', {
             url: '^/inventory',

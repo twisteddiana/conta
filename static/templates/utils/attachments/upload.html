@@ -1,0 +1,21 @@
+<div class="form-group">
+    <table class="table" ng-if="model.length">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="file in model">
+            <td>{{file.name}}</td>
+            <td>
+                <button type="button" class="btn btn-sm btn-danger" ng-click="delete($index)">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <input type="file" multiple data-ng-model="files" file-model>
+</div>

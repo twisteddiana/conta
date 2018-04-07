@@ -1,7 +1,7 @@
 /**
  * Created by Diana on 11/25/2016.
  */
-Conta.controller("reportsCtrl", function ($scope, $http, $state, Entity, Inventory) {
+angular.module('Conta').controller("reportsCtrl", function ($scope, $http, $state, Entity, Inventory) {
     $scope.reports = [
         {name: 'Fisa operatiuni diverse', action: 'sheet'},
         {name: 'Jurnal operatiuni diverse', action: 'journal'},
@@ -14,7 +14,7 @@ Conta.controller("reportsCtrl", function ($scope, $http, $state, Entity, Invento
         sort: 'classification',
         reduce: true,
         group_level: 1
-    }).success(function (data) {
+    }).then(function (data) {
         $scope.classifications = data.rows;
     })
 
@@ -51,11 +51,11 @@ Conta.controller("reportsCtrl", function ($scope, $http, $state, Entity, Invento
             classification: report.classification
         };
         if (report.action != 'inventory') {
-            Entity.report(data).success(function (data) {
+            Entity.report(data).then((data) => {
                 downloadReport(data, report);
             })
         } else {
-            Inventory.report(data).success(function(data) {
+            Inventory.report(data).then((data) => {
                 downloadReport(data, report);
             })
         }
@@ -82,7 +82,7 @@ Conta.controller("reportsCtrl", function ($scope, $http, $state, Entity, Invento
 });
 
 
-Conta.controller("statementCtrl", function ($scope, $http, $state, Entity) {
+angular.module('Conta').controller("statementCtrl", function ($scope, $http, $state, Entity) {
     $scope.title = "Declaratia 200";
     $scope.subtitle = "Rapoarte";
 
@@ -101,7 +101,7 @@ Conta.controller("statementCtrl", function ($scope, $http, $state, Entity) {
 
     $scope.submit = function(isValid) {
         if (isValid) {
-            Entity.statement({year: $scope.year}).success(function(data) {
+            Entity.statement({year: $scope.year}).then((data) => {
                 $scope.response = data;
             })
         }

@@ -93,10 +93,11 @@ class EntityUploadHandler(tornado.web.RequestHandler):
 		post_entity = tornado.escape.json_decode(self.get_body_argument("entity"))
 		entity = Entity()
 		entity.initialise()
-		file_info = self.request.files['file'][0]
+		for file in self.request.files:
+			result = yield entity.save_attachment(post_entity, self.request.files[file][0])
+			post_entity = { '_id': result['id'], '_rev': result['rev'] }
 
-		result = yield entity.save_attachment(post_entity, file_info)
-		self.write(result)
+		self.write(post_entity)
 
 	@gen.coroutine
 	def post(self, attachment_name):

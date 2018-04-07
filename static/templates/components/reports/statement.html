@@ -1,4 +1,4 @@
-<div class="page-header col-lg-10">
+<div class="page-header">
     <div class="toolbar">
         <div class="text-right">
 
@@ -6,7 +6,7 @@
     </div>
     <h2>{{title}} <span>{{subtitle}}</span></h2>
 </div>
-<div class="col-xs-12">
+<div class="col-12">
     <div class="box">
         <form ng-submit="submit(statement.$valid)" novalidate name="statement">
             <div class="form-group row">
@@ -43,12 +43,11 @@
                         <td class="text-lg-right">{{response.brut_income}} RON</td>
                     </tr>
                     <tr>
-                        <td colspan="2">2. Cheltuieli deductibile, din care:</td>
+                        <td colspan="2">2. Cheltuieli deductibile:</td>
                         <td class="text-lg-right">{{response.payments}} RON</td>
                     </tr>
                     <tr>
-                        <td width="50px"></td>
-                        <td width="500px">2. Contributii sociale obligatorii, potrivit legii</td>
+                        <td colspan="2">2.1 Contributii sociale obligatorii, potrivit legii</td>
                         <td class="text-lg-right">{{response.social_payments}} RON</td>
                     </tr>
                     <tr>

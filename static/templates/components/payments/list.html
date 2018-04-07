@@ -1,4 +1,4 @@
-<div class="page-header col-lg-10">
+<div class="page-header">
     <div class="toolbar">
         <div class="text-right">
             <a ng-click="display_filter()" class="btn btn-warning">Filtru</a>
@@ -7,7 +7,7 @@
     </div>
     <h2>{{title}} <span>{{subtitle}}</span></h2>
 </div>
-<div class="col-xs-12">
+<div class="col-12">
     <div class="box" ng-if="show_filter">
         <filter></filter>
     </div>
@@ -44,9 +44,10 @@
                 <td>{{item.doc.payment_type}}</td>
                 <td class="quick-actions">
                     <div class="btn-group">
-                    <button ng-click="edit(item.id)" ng-if="item.doc.classification != 'Amortizari'" class="btn btn-sm btn-success"><i class="fa fa-pencil"></i></button>
-                    <button ng-click="delete(item.id)" ng-if="item.doc.classification != 'Amortizari'" class="btn btn-sm btn-red"><i class="fa fa-trash"></i></button>
-                        </div>
+                        <button ng-click="edit(item.id)" ng-if="item.doc.classification != 'Amortizari'" class="btn btn-sm btn-success"><i class="fa fa-pencil"></i></button>
+                        <button ng-click="clone(item.id)" ng-if="item.doc.classification != 'Amortizari'" class="btn btn-sm btn-primary"><i class="fa fa-copy"></i></button>
+                        <button ng-click="delete(item.id)" ng-if="item.doc.classification != 'Amortizari'" class="btn btn-sm btn-red"><i class="fa fa-trash"></i></button>
+                    </div>
                 </td>
             </tr>
             <tr ng-if="!rows.length">
