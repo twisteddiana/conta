@@ -47,19 +47,12 @@
                         <td class="text-lg-right">{{response.payments}} RON</td>
                     </tr>
                     <tr>
-                        <td colspan="2">2.1 Contributii sociale obligatorii, potrivit legii</td>
-                        <td class="text-lg-right">{{response.social_payments}} RON</td>
+                        <td colspan="2">3. Contributii sociale</td>
+                        <td class="text-lg-right">{{response.social_payments['CAS (pensie)']}} RON</td>
                     </tr>
                     <tr>
-                        <td colspan="2">
-                            3. Venit net anual (rd.1-rd.2), din care:
-                        </td>
-                        <td class="text-lg-right">{{response.net_income}} RON</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td>3.1. Venit net aferent activităţilor cu regim de reţinere la sursă a impozitului</td>
-                        <td class="text-lg-right"> {{response.untaxable_income}} RON</td>
+                        <td colspan="2">4. Contributii sanatate</td>
+                        <td class="text-lg-right">{{response.social_payments['CASS (sanatate)']}} RON</td>
                     </tr>
                 </table>
             </div>

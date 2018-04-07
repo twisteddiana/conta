@@ -54,8 +54,6 @@ class InventoryReportHandler(tornado.web.RequestHandler):
 		inventory.initialise()
 
 		list = yield inventory.report(query['date_start'])
-		for i, row in enumerate(list):
-			print(row)
 		html = self.render_string('reports/inventory.html', inventory=list, inventory_date=query['date_end'])
 
 		path_wkthmltopdf = b'C:\Program Files\wkhtmltopdf\\bin\wkhtmltopdf.exe'

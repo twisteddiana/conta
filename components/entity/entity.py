@@ -230,7 +230,10 @@ class Entity:
 		brut_income = 0
 		untaxable_income = 0
 		payments = 0
-		social_payments = 0
+		social_payments = {
+			'CAS (pensie)': 0,
+			'CASS (sanatate)': 0
+		}
 
 		for doc in rows:
 			if doc['doc']['type'] == 'income':
@@ -239,23 +242,28 @@ class Entity:
 					untaxable_income += round(doc['doc']['real_amount'] * (100 - doc['doc']['deductible']) / 100, 2)
 			else:
 				if doc['doc']['classification'] == 'CAS (pensie)' or doc['doc']['classification'] == 'CASS (sanatate)':
-					social_payments += round(doc['doc']['deductible_amount'], 2)
+					social_payments[doc['doc']['classification']] += round(doc['doc']['deductible_amount'], 2)
 				else:
 					payments += round(doc['doc']['deductible_amount'], 2)
 
 		brut_income = round(brut_income, 2)
 		untaxable_income = round(untaxable_income, 2)
 		payments = round(payments, 2)
-		social_payments = round(social_payments, 2)
+		social_payments['CAS (pensie)'] = round(social_payments['CAS (pensie)'], 2)
+		social_payments['CASS (sanatate)'] = round(social_payments['CASS (sanatate)'], 2)
 		net_income = round(brut_income - payments, 2)
 
 		if query['year'] <= '2015':
 			medical_insurance = round((net_income - untaxable_income) * 5.5/100, 2)
 			pension = round((net_income - untaxable_income) * 10.5/100, 2)
 			income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 16/100, 2)
+		elif query['year'] == '2016':
+			medical_insurance = round((net_income - untaxable_income) * 5.5 / 100, 2)
+			pension = social_payments['CAS (pensie)']
+			income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 16 / 100, 2)
 		elif query['year'] == '2017':
 			medical_insurance = round((net_income - untaxable_income) * 5.5 / 100, 2)
-			pension = 1176
+			pension = social_payments['CAS (pensie)']
 			income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 16 / 100, 2)
 		elif query['year'] == '2018':
 			base = 1900

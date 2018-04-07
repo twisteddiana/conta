@@ -29,6 +29,36 @@ angular.module('Conta').controller("entityController", function ($scope, $http, 
         }
     };
 
+    $scope.clean_filter = () => {
+        angular.forEach($scope.filters, (filter, filter_name) => {
+            if (typeof filter.value != 'undefined') {
+                if (filter_name == 'date') {
+                    filter.value = {
+                        start_key: null,
+                        end_key: null
+                    }
+                } else {
+                    filter.value = undefined;
+                    if (filter.values) {
+                        angular.forEach(filter.values, (value) => {
+                            value.checked = false;
+                        })
+                    }
+                }
+            }
+        });
+
+        var params = $scope.getListParams();
+        params.filter = {};
+        $scope.saveCookieFilter();
+        Entity.post(params).then((data) =>  {
+            $scope.skip = data.skip;
+            $scope.total_rows = data.total_rows;
+            $scope.rows = data.rows;
+            $scope.pages = Math.ceil($scope.total_rows/$scope.limit);
+        })
+    }
+
     $scope.execute_filter = () =>  {
         var params = $scope.getListParams();
         params.filter = {};
@@ -55,7 +85,6 @@ angular.module('Conta').controller("entityController", function ($scope, $http, 
             $scope.total_rows = data.total_rows;
             $scope.rows = data.rows;
             $scope.pages = Math.ceil($scope.total_rows/$scope.limit);
-            console.log($scope.pages);
         })
     }
 

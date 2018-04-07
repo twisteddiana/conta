@@ -152,7 +152,7 @@ angular.module('Conta').controller("amortizationsViewCtrl", function ($scope, $h
 	$scope.entityID = $stateParams.entityID;
 	$scope.item = {};
 	Amortization.getOne($scope.entityID).then((data) => {
-		$scope.item = data;
+		$scope.item = data.data;
 		$scope.subtitle = $scope.item.name;
 
 		$scope.getList();
@@ -165,7 +165,8 @@ angular.module('Conta').controller("amortizationsViewCtrl", function ($scope, $h
 			limit: $scope.item.duration,
 			sort: 'object',
 			direction: 'asc',
-			start_key: [$scope.item._id],
+			start_key: [$scope.entityID ],
+			end_key: [$scope.entityID , {}],
 			reduce: false
 		}
 	};
@@ -185,7 +186,7 @@ angular.module('Conta').controller("amortizationsEditCtrl", function ($scope, $h
 	$scope.entityID = $stateParams.entityID;
 	$scope.item = {};
 	Amortization.getOne($scope.entityID).then((data) => {
-		$scope.item = data;
+		$scope.item = data.data;
 		$scope.item.date = $scope.item.date_clear;
 		$scope.subtitle = $scope.item.name;
 	})

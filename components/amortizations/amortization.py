@@ -156,6 +156,10 @@ class Amortization:
 				month = item_date.month
 				year = item_date.year
 
+		# save last group
+		if group is not None:
+			result = yield entity.post(group)
+
 		return result
 
 	@gen.coroutine
