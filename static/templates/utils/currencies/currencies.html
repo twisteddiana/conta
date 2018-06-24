@@ -1,6 +1,6 @@
 <div class="exchange_rates">
     <h4><i class="fa fa-exchange"></i> Exchange Rates</h4>
     <div ng-repeat="currency in currencies">
-        <span ng-if="!currency.doc.main">{{currency.doc.name}} = {{currency.doc.exchange_rate}} {{main_currency.doc.name}}</span>
+        <span ng-if="!currency.main">{{currency.name}} = {{currency.exchange_rate}} {{main_currency.name}}</span>
     </div>
 </div>

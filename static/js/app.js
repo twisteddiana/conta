@@ -11,15 +11,14 @@ require('sweetalert2');
 require('angular-sweetalert');
 require('angular-sanitize')
 
-const Conta = angular.module('Conta', ['ui.router', 'ui.router.menus', 'ui.mask', 'oitozero.ngSweetAlert', 'ngCookies', 'ngSanitize']);
+const Conta = angular.module(
+  'Conta',
+  ['ui.router', 'ui.router.menus', 'ui.mask', 'oitozero.ngSweetAlert', 'ngCookies', 'ngSanitize']
+);
 Conta.run(['$rootScope', '$location', function ($rootScope, $location) {
-    if ($location.path() == '')
-        $location.path('/dashboard');
-    $rootScope.$on('$stateChangeStart', function (event, toState, $window) {
-        /*if (requireLogin && typeof $rootScope.user === 'undefined') {
-            $location.path('/login');
-        }*/
-    });
+  if ($location.path() == '') {
+    $location.path('/dashboard');
+  }
 }]);
 
 require('./app/bootstrap');

@@ -75,8 +75,8 @@
                             </div>
                             <div class="col-lg-8">
                                 <select ng-model-options="{allowInvalid: true}" ng-change="updateExchangeRate()" data-ng-model="item.currency" required class="form-control">
-                                    <option data-ng-repeat="currency in currencies" value="{{currency.doc.iso}}">
-                                        {{currency.doc.iso}}
+                                    <option data-ng-repeat="currency in currencies" value="{{currency.iso}}">
+                                        {{currency.iso}}
                                     </option>
                                 </select>
                             </div>

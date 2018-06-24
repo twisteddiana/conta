@@ -4,36 +4,18 @@
 /**
  * Created by Diana on 11/22/2016.
  */
-angular.module('Conta').factory('Inventory', function($http) {
-    return {
-        post: function (data) {
-            if (typeof data == 'undefined')
-                data = {};
+angular
+  .module('Conta')
+  .factory('Inventory', ($http) => ({
+    all:  (data) => {
+      data = data || {};
+      data.descending = data.direction === 'desc' ? true : false;
+      data.reduce = !!data.reduce;
 
-            if (data['direction'] == 'desc')
-                data['descending'] = true;
-            else
-                data['descending'] = false;
-
-            if (typeof data['reduce'] == 'undefined')
-                data['reduce'] = false;
-
-            return $http.post('/inventory', data).then(data => data.data);
-        },
-        getOne: function(id) {
-            var extension = "";
-            if (typeof id != 'undefined')
-                extension += "/"+id;
-            return $http.get('/inventory' + extension).then(data => data.data);
-        },
-        create: function(data) {
-            return $http.put('/inventory', data).then(data => data.data);
-        },
-        delete: function(id){
-            return $http.delete('/inventory/' + id).then(data => data.data);
-        },
-        report: function(data) {
-            return $http.post('/inventory/report', data, {responseType: 'arraybuffer'}).then(data => data.data);
-        }
-    }
-})
+      return $http.post('/inventory', data).then(data => data.data);
+    },
+    get: (id) => $http.get(`/inventory/${id}`).then(data => data.data),
+    create: (data) => $http.put('/inventory', data).then(data => data.data),
+    delete: (id) => $http.delete(`/inventory/${id}`).then(data => data.data),
+    report: (data) => $http.post('/inventory/report', data, { responseType: 'arraybuffer' }).then(data => data.data)
+}));

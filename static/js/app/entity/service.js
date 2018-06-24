@@ -1,86 +1,73 @@
 /**
  * Created by Diana on 11/15/2016.
  */
-angular.module('Conta').factory('Entity', ($http) => {
-    return {
-        post: (data) => {
-            if (typeof data == 'undefined')
-                data = {};
+angular
+  .module('Conta')
+  .factory('Entity', $http => ({
+    all: data => {
+      data = data || {};
+      data.descending = data.direction === 'desc' ? true : false;
+      data.reduce = !!data.reduce;
 
-            if (data['direction'] == 'desc')
-                data['descending'] = true;
-            else
-                data['descending'] = false;
+      return $http.post('/entities', data).then(data => data.data);
+    },
+    get: id => $http.get(`/entity/${id}`).then(data => data.data),
+    create: data => $http.post('/entity', data).then(data => data.data),
+    delete: id => $http.delete(`/entity/${id}`).then(data => data.data),
+    report: data => $http.post('/report', data,  { responseType: 'arraybuffer' }).then(data => data.data),
+    statement: data => $http.post('/statement', data).then(data => data.data)
+  }));
 
-            if (typeof data['reduce'] == 'undefined')
-                data['reduce'] = false;
+angular
+  .module('Conta')
+  .factory('Currency', $http => ({
+    all: () =>
+      $http
+        .get('/currencies')
+        .then(data => data.data.rows.map(row => row.doc)),
+    get: id =>
+      $http
+        .get('/currencies/' + id)
+        .then(data => data.data)
+  }));
 
-            return $http.post('/entities', data).then(data => data.data);
-        },
-        getOne: (id) => {
-            var extension = "";
-            if (typeof id != 'undefined')
-                extension += "/"+id;
-            return $http.get('/entity' + extension).then(data => data.data);
-        },
-        create: (data) => {
-            return $http.post('/entity', data).then(data => data.data);
-        },
-        delete: (id) =>{
-            return $http.delete('/entity/' + id).then(data => data.data);
-        },
-        report: (data) => {
-            return $http.post('/report', data,  {responseType: 'arraybuffer'}).then(data => data.data);
-        },
-        statement: (data) => {
-            return $http.post('/statement', data).then(data => data.data);
-        }
+angular
+  .module('Conta')
+  .factory('ExchangeRates', $http => ({
+    get: (currency_iso, date) => {
+      let request;
+      if (date) {
+        request = $http.get(`/exchange_rates/${currency_iso}/${date}`);
+      } else {
+        request = $http.get(`/exchange_rates/${currency_iso}`);
+      }
+      return request.then(data => data.data)
     }
-})
+  }));
 
-angular.module('Conta').factory('Currency', ($http) => {
+angular
+  .module('Conta')
+  .service('EntityAttachmentUpload', function($http) {
     return {
-        get: function () {
-            return $http.get('/currencies').then(data => data.data);
-        },
-        getOne: (id) => {
-            var extension = "";
-            if (typeof id != 'undefined')
-                extension += "/"+id;
-            return $http.get('/currency' + extension).then(data => data.data);
-        }
-    }
-})
+      upload: (files, entity) => {
+        const fd = new FormData();
+        angular.forEach(files, (file, key) => fd.append('file_' + key, file));
 
-angular.module('Conta').factory('ExchangeRates', ($http) => {
-    return {
-        get: (currency_iso, date) => {
-            if (typeof date == 'undefined')
-                return $http.get('/exchange_rates/'+currency_iso).then(data => data.data);
-            else
-                return $http.get('/exchange_rates/'+currency_iso+'/'+date).then(data => data.data);
-        }
+        fd.append('entity', JSON.stringify(entity));
+        return $http
+          .put('/entity/upload', fd, {
+            transformRequest: angular.identity,
+            headers: {'Content-Type': undefined}
+          })
+          .then(data => data.data);
+      },
+      get: (name, entity) =>
+        $http
+          .post(`/entity/attachment/${name}`, entity, {responseType: 'arraybuffer'})
+          .then(data => data.data),
+      delete: (name, entity) =>
+        $http
+          .delete(`/entity/attachment?name=${name}&doc_id=${entity._id}&rev=${entity._rev}`)
+          .then(data => data.data)
     }
-})
-
-angular.module('Conta').service('EntityAttachmentUpload', ['$http', function ($http) {
-    return {
-        upload: (files, entity) => {
-            var fd = new FormData();
-            angular.forEach(files, (file, key) => {
-               fd.append('file_' + key, file);
-            });
-            fd.append('entity', JSON.stringify(entity));
-            return $http.put('/entity/upload', fd, {
-                transformRequest: angular.identity,
-                headers: {'Content-Type': undefined}
-            }).then(data => data.data);
-        },
-        getAttachment: (name, entity) => {
-            return $http.post('/entity/attachment/'+name, entity, {responseType: 'arraybuffer'}).then(data => data.data);
-        },
-        deleteAttachment: (name, entity) => {
-            return $http.delete('/entity/attachment?name='+name + '&doc_id=' + entity._id + '&rev=' + entity._rev).then(data => data.data);
-        }
-    }
-}]);
+  });

@@ -2,23 +2,25 @@
  * Created by Diana on 11/12/2016.
  */
 
-angular.module('Conta').config(($stateProvider) => {
+angular
+  .module('Conta')
+  .config($stateProvider => {
     $stateProvider
-        .state('app', {
-            abstract: true,
-            data: {
-                displayName: 'Home'
-            },
-            views: {
-                'header@app': {
-                    templateUrl: 'static/templates/utils/header.html'
-                },
-                'menu@app': {
-                    templateUrl: 'static/templates/utils/menu/menu.html'
-                },
-                '': {
-                    templateUrl: 'static/templates/utils/index.html'
-                }
-            }
-        })
-});
+      .state('app', {
+        abstract: true,
+        data: {
+          displayName: 'Home'
+        },
+        views: {
+          'header@app': {
+            templateUrl: 'static/templates/utils/header.html'
+          },
+          'menu@app': {
+            templateUrl: 'static/templates/utils/menu/menu.html'
+          },
+          '': {
+            templateUrl: 'static/templates/utils/index.html'
+          }
+        }
+      })
+  });
