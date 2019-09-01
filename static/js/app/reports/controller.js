@@ -4,11 +4,19 @@
 angular
   .module('Conta')
   .controller("reportsCtrl", function ($scope, $http, $state, Entity, Inventory) {
+    $scope.reportsConfig = {
+      'sheet': { action: 'sheet', yearly: false, classification: true },
+      'journal': { action: 'journal', yearly: false, classification: true },
+      'registry': { action: 'registry', yearly: true, classification: false },
+      'fiscal_evidence': { action: 'fiscal_evidence', yearly: true, classification: false },
+      'inventory': { action: 'inventory', yearly: true, classification: false }
+    };
     $scope.reports = [
-      {name: 'Fisa operatiuni diverse', action: 'sheet'},
-      {name: 'Jurnal operatiuni diverse', action: 'journal'},
-      {name: 'Registru de incasari si plati', action: 'registry'},
-      {name: 'Registru inventar', action: 'inventory'}
+      { name: 'Fisa operatiuni diverse', type: 'sheet' },
+      { name: 'Jurnal operatiuni diverse', type: 'journal' },
+      { name: 'Registru de incasari si plati', type: 'registry' },
+      { name: 'Registru de evidenta fiscala', type: 'fiscal_evidence' },
+      { name: 'Registru inventar', type: 'inventory' }
     ];
 
     Entity
@@ -38,8 +46,9 @@ angular
 
     $scope.submit = (report) => {
       let start_date,
-        end_date;
-      if (report.action == 'registry' || report.action == 'inventory' || report.month == 0) {
+          end_date;
+      const config = $scope.reportsConfig[report.type];
+      if (config.yearly || report.month == 0) {
         start_date = '01-01-' + report.year;
         end_date = '31-12-' + report.year;
       } else {
@@ -49,10 +58,10 @@ angular
       const data = {
         date_start: start_date,
         date_end: end_date,
-        report: report.action,
-        classification: report.classification
+        report: config.action,
+        classification: config.classification && report.classification
       };
-      if (report.action != 'inventory') {
+      if (config.action != 'inventory') {
         Entity
           .report(data)
           .then(data => downloadReport(data, report))

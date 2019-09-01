@@ -40,32 +40,35 @@ angular
     $scope.currencies = [];
 
     $controller('entityAddCtrl', { $scope: $scope });
-    $scope.loadCurrencies().then(() => $scope.item.currency = $scope.main_currency);
+    const currencyPromise = $scope.loadCurrencies().then(() => $scope.item.currency = $scope.main_currency);
 
     $scope.submit = isValid => {
       if (!isValid) {
         return;
       }
-      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
-      $scope.item.type = 'income';
-      $scope.item.classification = 'Incasare';
-      $scope.item.deductible = 100;
 
-      Entity
-        .create($scope.item)
-        .then(result => {
-          $scope.item._id = result.id;
-          $scope.item._rev = result.rev;
+      currencyPromise.then(() => {
+        $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
+        $scope.item.type = 'income';
+        $scope.item.classification = 'Incasare';
+        $scope.item.deductible = 100;
 
-          if ($scope.attachments) {
-            EntityAttachmentUpload
-              .upload($scope.attachments, $scope.item)
-              .then(() => $state.go('app.payments'));
-          } else {
-            $state.go('app.income');
-          }
-        })
-        .catch(errors => $scope.errors = errors);
+        Entity
+          .create($scope.item)
+          .then(result => {
+            $scope.item._id = result.id;
+            $scope.item._rev = result.rev;
+
+            if ($scope.attachments) {
+              EntityAttachmentUpload
+                .upload($scope.attachments, $scope.item)
+                .then(() => $state.go('app.payments'));
+            } else {
+              $state.go('app.income');
+            }
+          })
+          .catch(errors => $scope.errors = errors);
+      });
     }
   });
 
@@ -78,16 +81,15 @@ angular
     $scope.item = {}
     $scope.attachments = [];
 
-    Entity
-      .get($scope.entityID)
+    $controller('entityAddCtrl', { $scope: $scope });
+    $scope
+      .loadCurrencies()
+      .then(() => Entity.get($scope.entityID))
       .then(item => {
         $scope.item = item;
         $scope.item.date = $scope.item.date_clear;
         $scope.updateExchangeRate();
       });
-
-    $controller('entityAddCtrl', { $scope: $scope });
-    $scope.loadCurrencies();
 
     $scope.submit = function(isValid) {
       if (!isValid) {

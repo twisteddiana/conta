@@ -13,12 +13,15 @@ class ReportHandler(tornado.web.RequestHandler):
 		else:
 			query = {}
 
-		if 'classification' in query.keys():
+		if 'classification' in query.keys() and query['classification']:
 			if query['classification'] == 'Amortizari' and query['report'] == 'sheet':
 				html = yield self.report_amortization(query)
 			else:
 				# other sheet or journal
 				html = yield self.general_report(query)
+		elif query['report'] == 'fiscal_evidence':
+			# fiscal evidence
+			html = yield self.fiscal_evidence_report(query)
 		else:
 			# registry
 			html = yield self.registry_report(query)
@@ -60,6 +63,18 @@ class ReportHandler(tornado.web.RequestHandler):
 
 		html = self.render_string("reports/" + query['report'] + '.html',
 								report=result['report'], transactions=result['transactions'])
+
+		return html
+
+	@gen.coroutine
+	def fiscal_evidence_report(self, query):
+		entity = Entity()
+		entity.initialise()
+
+		result = yield entity.fiscal_evidence_report(query)
+
+		html = self.render_string("reports/" + query['report'] + '.html',
+								year=result['year'], classifications=result['classifications'])
 
 		return html
 

@@ -153,7 +153,7 @@ class Entity:
 		date_end = date_end + timedelta(days=days_in_month - date_end.day)
 		date_end_timestamp = int(time.mktime(date_end.timetuple()))
 
-		if query['report'] == 'registry':
+		if query['report'] == 'registry' or query['report'] == 'fiscal_evidence':
 			dictionary['view'] = 'date'
 			dictionary['start_key'] = date_start_year_timestamp
 			dictionary['end_key'] = date_end_timestamp
@@ -172,9 +172,10 @@ class Entity:
 
 		report = 0
 		transactions = []
+		deductible_only = query['report'] == 'journal'
 		for item in rows:
 			if item['doc']['date'] < date_start_timestamp:
-				if query['report'] == 'journal':
+				if deductible_only:
 					# sum up only deductible
 					report += round(item['doc']['real_amount'] * item['doc']['deductible'] / 100, 2)
 				else:
@@ -193,7 +194,8 @@ class Entity:
 					'type': item['doc']['type']
 				}
 				if 'real_amount' in item['doc'].keys():
-					if query['report'] == 'journal':
+					if deductible_only:
+						# sum up only deductible
 						transaction['amount'] = round(item['doc']['real_amount'] * item['doc']['deductible'] / 100, 2)
 					else:
 						transaction['amount'] = round(item['doc']['real_amount'], 2)
@@ -202,6 +204,66 @@ class Entity:
 		return {
 			'report': report,
 			'transactions': transactions
+		}
+
+	@gen.coroutine
+	def fiscal_evidence_report(self, query):
+		classifications_result = yield self.db.view('all', 'classification', reduce=True, group_level=1)
+		classifications = []
+
+		date_start = datetime.strptime(query['date_start'], '%d-%m-%Y')
+		# first day of the month
+		date_start = date_start - timedelta(days=date_start.day - 1)
+		date_start_year = date_start.replace(month=1, day=1)
+		date_start_year_timestamp = int(time.mktime(date_start_year.timetuple()))
+
+		date_end = datetime.strptime(query['date_end'], '%d-%m-%Y')
+		# last day of the month
+		days_in_month = calendar.monthrange(date_end.year, date_end.month)[1]
+		date_end = date_end + timedelta(days=days_in_month - date_end.day)
+		date_end_timestamp = int(time.mktime(date_end.timetuple()))
+
+		for classification in classifications_result['rows']:
+			classification_name = classification['key'][0]
+			if classification_name == 'CAS (pensie)' or classification_name == 'CASS (sanatate)':
+				continue
+
+			transactions = []
+			total = 0
+			classifications_query = {
+				'start_key': [classification_name, date_start_year_timestamp],
+				'end_key': [classification_name, date_end_timestamp],
+				'reduce': False,
+				'include_docs': True
+			}
+
+			result = yield self.db.view('all', 'classification', **classifications_query)
+			for row in result['rows']:
+				transaction_date = datetime.fromtimestamp(row['doc']['date'])
+				amount = row['doc']['deductible_amount'] if 'deductible_amount' in row['doc'] else row['doc']['real_amount']
+				transaction = {
+					'date': row['doc']['date_clear'],
+					'document_type': row['doc']['document_type'],
+					'document_number': row['doc']['document_number'],
+					'description': row['doc']['description'],
+					'month': transaction_date.month,
+					'year': transaction_date.year,
+					'payment_type': row['doc']['payment_type'],
+					'type': row['doc']['type'],
+					'amount': round(amount, 2)
+				}
+				transactions.append(transaction)
+				total += round(transaction['amount'], 2)
+
+			classifications.append({
+				'name': classification_name,
+				'transactions': transactions,
+				'total': round(total, 2)
+			})
+
+		return {
+			'classifications': classifications,
+			'year': date_start.year
 		}
 
 	@gen.coroutine

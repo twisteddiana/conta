@@ -45,6 +45,7 @@ class ExpensesHandler(tornado.web.RequestHandler):
 class ExpensesUploadHandler(tornado.web.RequestHandler):
 	@gen.coroutine
 	def put(self):
+		result = {}
 		post_expense = tornado.escape.json_decode(self.get_body_argument("expense"))
 		expense = Expenses()
 		expense.initialise()

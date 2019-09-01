@@ -8,11 +8,11 @@
 </div>
 <div class="col-12">
     <div class="box" ng-repeat="report in reports">
-        <form ng-submit="submit(report)" novalidate name="{{report.action}}">
+        <form ng-submit="submit(report)" novalidate name="{{reportsConfig[report.type].action}}">
             <div class="box-heading">
                 {{report.name}}
             </div>
-            <div class="form-group row" ng-if="report.action != 'registry' && report.action != 'inventory'">
+            <div class="form-group row" ng-if="!reportsConfig[report.type].yearly">
                 <div class="col-lg-2">
                     <label class="form-control-label">Luna/Anul</label>
                 </div>
@@ -39,7 +39,7 @@
                     </select>
                 </div>
             </div>
-            <div class="form-group row" ng-if="report.action !='registry' && report.action != 'inventory'">
+            <div class="form-group row" ng-if="reportsConfig[report.type].classification">
                 <div class="col-lg-2">
                     <label class="form-control-label">Clasificare</label>
                 </div>
@@ -49,7 +49,7 @@
                     </select>
                 </div>
             </div>
-            <div class="form-group row" ng-if="report.action == 'registry' || report.action == 'inventory'">
+            <div class="form-group row" ng-if="reportsConfig[report.type].yearly">
                 <div class="col-lg-2">
                     <label class="form-control-label">Anul</label>
                 </div>
@@ -62,7 +62,7 @@
             <div class="form-group row">
                 <div class="col-lg-2"></div>
                 <div class="col-lg-2">
-                    <button class="btn btn-success" ng-disabled="{{report.action}}.$invalid">
+                    <button class="btn btn-success" ng-disabled="{{reportsConfig[report.type].action}}.$invalid">
                         <i class="fa fa-check"></i> Genereaza raport
                     </button>
                 </div>

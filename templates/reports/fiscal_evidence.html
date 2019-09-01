@@ -1,0 +1,67 @@
+<style>
+    .container {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 13px;
+    }
+    .text-center {
+        text-align: center;
+    }
+    table {
+        width: 100%;
+    }
+    table tr td {
+        padding: 5px;
+        border: 1px solid #333;
+        page-break-inside:avoid;
+    }
+    table tr {
+        page-break-inside:avoid;
+    }
+    table {
+        border-collapse: collapse;
+    }
+    .text-right {
+        text-align: right;
+    }
+    td.date {
+        width: 100px;
+    }
+    td.doc_type {
+        width: 150px;
+    }
+     tr.heading {
+        font-weight: bold;
+    }
+    tr.grey {
+        background: #bbb;
+    }
+</style>
+<div class="container">
+    <h1 class="text-center">Registru de evidenta fiscala</h1>
+    <h2 class="text-center">Anul: {{year}}</h2>
+    {% for classification in classifications %}
+    <h4>Categorie: {{classification['name']}}</h4>
+    <table>
+        <tr>
+            <td class="heading grey">Nr. crt.</td>
+            <td class="heading grey">Elemente de calcul pentru stabilirea venitului net anual</td>
+            <td class="heading grey">Valoare - lei -</td>
+        </tr>
+        {% set counter = 0 %}
+        {% for transaction in classification['transactions'] %}
+        <tr>
+            <td>
+                {% set counter = counter + 1 %}
+                {{ counter }}
+            </td>
+            <td>{{ transaction['date'] }} <br> {{ transaction['description'] }}</td>
+            <td>{{ transaction['amount'] }}</td>
+        </tr>
+        {% end %}
+        <tr>
+            <td colspan="2">Total</td>
+            <td>{{ classification['total'] }}</td>
+        </tr>
+        </table>
+    {% end %}
+</div>

@@ -50,32 +50,34 @@ angular
 
     $controller('entityAddCtrl', { $scope: $scope });
     $controller('dashboardCtrl', { $scope: $scope });
-    $scope.loadCurrencies().then(() => $scope.item.currency = $scope.main_currency);
+    const currencyPromise = $scope.loadCurrencies().then(() => $scope.item.currency = $scope.main_currency);
 
     $scope.submit = (isValid) => {
       if (!isValid) {
         return;
       }
 
-      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
-      $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
-      $scope.item.type = 'payment';
+      currencyPromise.then(() => {
+        $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
+        $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
+        $scope.item.type = 'payment';
 
-      Entity
-        .create($scope.item)
-        .then(result => {
-          $scope.item._id = result.id;
-          $scope.item._rev = result.rev;
+        Entity
+          .create($scope.item)
+          .then(result => {
+            $scope.item._id = result.id;
+            $scope.item._rev = result.rev;
 
-          if ($scope.attachments) {
-            EntityAttachmentUpload
-              .upload($scope.attachments, $scope.item)
-              .then(() => $state.go('app.payments'));
-          } else {
-            $state.go('app.payments');
-          }
-        })
-        .catch(errors => $scope.errors = errors);
+            if ($scope.attachments) {
+              EntityAttachmentUpload
+                .upload($scope.attachments, $scope.item)
+                .then(() => $state.go('app.payments'));
+            } else {
+              $state.go('app.payments');
+            }
+          })
+          .catch(errors => $scope.errors = errors);
+      });
     }
   });
 
@@ -85,18 +87,19 @@ angular
     $scope.title = 'Edit payment entity';
     $scope.subtitle = 'Payment';
     $scope.item_id = $stateParams.entityID;
-    $scope.item = {}
-    Entity
-      .get($scope.item_id)
+    $scope.item = {};
+    $controller('entityAddCtrl', { $scope: $scope });
+    $controller('dashboardCtrl', { $scope: $scope });
+    
+    const currencyPromise = $scope.loadCurrencies();
+
+    currencyPromise
+      .then(() => Entity.get($scope.item_id))
       .then((data) => {
         $scope.item = data;
         $scope.item.date = $scope.item.date_clear;
         $scope.updateExchangeRate();
-      })
-
-    $controller('entityAddCtrl', { $scope: $scope });
-    $controller('dashboardCtrl', { $scope: $scope });
-    $scope.loadCurrencies()
+      });
 
     $scope.submit = (isValid) => {
       if (!isValid) {
@@ -130,8 +133,13 @@ angular
     $scope.subtitle = 'Payment';
     $scope.item_id = $stateParams.entityID;
     $scope.item = {};
-    Entity
-      .get($scope.item_id)
+
+    $controller('entityAddCtrl', { $scope: $scope });
+    $controller('dashboardCtrl', { $scope: $scope });
+    const currencyPromise = $scope.loadCurrencies();
+
+    currencyPromise
+      .then(() => Entity.get($scope.item_id))
       .then((data) => {
         $scope.item = data;
         delete $scope.item._id;
@@ -140,10 +148,6 @@ angular
         $scope.item.date = $scope.item.date_clear;
         $scope.updateExchangeRate();
       });
-
-    $controller('entityAddCtrl', { $scope: $scope });
-    $controller('dashboardCtrl', { $scope: $scope });
-    $scope.loadCurrencies();
 
     $scope.submit = (isValid) => {
       if (!isValid) {
