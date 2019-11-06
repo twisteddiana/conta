@@ -183,6 +183,7 @@ class Entity:
 					report += round(item['doc']['real_amount'], 2)
 			else:
 				transaction_date = datetime.fromtimestamp(item['doc']['date'])
+
 				transaction = {
 					'date': item['doc']['date_clear'],
 					'document_type': item['doc']['document_type'],
@@ -191,7 +192,9 @@ class Entity:
 					'month': transaction_date.month,
 					'year': transaction_date.year,
 					'payment_type': item['doc']['payment_type'],
-					'type': item['doc']['type']
+					'type': item['doc']['type'],
+					'amount': item['doc']['amount'],
+					'currency': item['doc']['currency'],
 				}
 				if 'real_amount' in item['doc'].keys():
 					if deductible_only:
@@ -265,6 +268,64 @@ class Entity:
 			'classifications': classifications,
 			'year': date_start.year
 		}
+
+	@gen.coroutine
+	def export(self, query):
+		exchange_rate = ExchangeRate()
+		exchange_rate.initialise()
+		exchange_rate.update()
+
+		date_start = datetime.strptime(query['date_start'], '%d-%m-%Y')
+		# first day of the month
+		date_start = date_start - timedelta(days=date_start.day - 1)
+		date_start_year = date_start.replace(month=1, day=1)
+		date_start_year_timestamp = int(time.mktime(date_start_year.timetuple()))
+		date_start_timestamp = int(time.mktime(date_start.timetuple()))
+
+		date_end = datetime.strptime(query['date_end'], '%d-%m-%Y')
+		# last day of the month
+		days_in_month = calendar.monthrange(date_end.year, date_end.month)[1]
+		date_end = date_end + timedelta(days=days_in_month - date_end.day)
+		date_end_timestamp = int(time.mktime(date_end.timetuple()))
+
+		dictionary = {
+			'design': 'all',
+			'view': 'date',
+			'start_key': date_start_timestamp,
+			'end_key': date_end_timestamp,
+			'reduce': False,
+			'include_docs': True
+		}
+
+		result = yield self.db.view(dictionary['design'], dictionary['view'], **dictionary)
+		rows = result['rows']
+
+		csv = ''
+		headers = ['Data', 'Tip', 'Descriere', 'Tip tranzactie', 'Valuta', 'Valoare', 'Curs', 'Valoare RON', 'Deductibil %', 'Deductibil RON']
+		csv += ','.join(headers) + '\n'
+
+		for doc in rows:
+			doc = doc['doc']
+			rate = '1' if doc['currency'] == 'RON' else (yield exchange_rate.get(doc['currency'], doc['date_clear'], False))['exchange_rate']
+			deductible = doc['deductible'] if doc['type'] == 'payment' else ''
+			dict = {
+				'Data': doc['date_clear'],
+				'Tip': 'Plata' if doc['type'] == 'payment' else 'Incasare',
+				'Descriere': doc['description'],
+				'Tip tranzactie': 'Banca' if doc['payment_type'] == 'Bank' else 'Numerar',
+				'Valuta': doc['currency'],
+				'Valoare': doc['amount'],
+				'Curs': rate,
+				'Valoare RON': doc['real_amount'],
+				'Deductibil %': deductible,
+				'Deductibil RON': round(doc['deductible_amount']) if deductible != '' else ''
+			}
+			row = []
+			for header in headers:
+				row.append(str(dict[header]))
+			csv += ','.join(row) + '\n'
+
+		return csv
 
 	@gen.coroutine
 	def statement(self, query):
@@ -383,31 +444,51 @@ class ExchangeRate:
 			pass
 
 	@gen.coroutine
+	def update(self):
+		currency = Currency()
+		currency.initialise()
+
+		currencies = (yield currency.collection())['rows']
+		today = date.today()
+		for item in currencies:
+			if item['doc']['iso'] != 'RON':
+				yield self.importRates(today.year, item['doc']['iso'])
+				yield self.importRates(today.year - 1, item['doc']['iso'])
+
+	@gen.coroutine
 	def post(self, dict):
 		doc = yield self.db.save_doc(dict)
 		return doc
 
 	@gen.coroutine
-	def get(self, iso, request_date=None):
+	def get(self, iso, request_date=None, import_rates=True):
+		one_day = 60 * 60 * 24;
 		if request_date is None:
 			today = date.today()
-			request_date = str(int(time.mktime(today.timetuple())))
+			request_date = str(int(time.mktime(today.timetuple())) - one_day)
 		else:
-			request_date = str(int(time.mktime(datetime.strptime(request_date, '%d-%m-%Y').timetuple())))
+			request_date = str(int(time.mktime(datetime.strptime(request_date, '%d-%m-%Y').timetuple())) - one_day)
 
-		doc = yield self.db.view('filter', 'by_date_and_iso', key=iso+request_date)
-		if not doc['rows']:
+		try:
+			doc = yield self.db.get_doc(iso + ':' + request_date)
+		except:
 			# the pair was not found
 			# import the thing
 			request_date_object = datetime.fromtimestamp(int(request_date))
 			year = request_date_object.year
+			print('requested date not found ' + iso + ':' + request_date)
 
-			success = yield self.importRates(year, iso)
-			success = yield self.importRates(year - 1, iso)
-			if success:
-				doc = yield self.db.view('filter', 'by_date_and_iso', key=iso + request_date)
-			if not doc['rows']:
-				doc = yield self.db.view('filter', 'by_date_and_iso', start_key=iso + request_date, descending=True, limit=1, inclusive_end=True)
+			if import_rates:
+				current = yield self.importRates(year, iso)
+				prev = yield self.importRates(year - 1, iso)
+
+			try:
+				doc = yield self.db.get_doc(iso + ':' + request_date)
+			except:
+				result = yield self.db.view('filter', 'by_date_and_iso', start_key=iso + request_date, descending=True, limit=1, inclusive_end=True)
+				doc = {
+					'exchange_rate': result['rows'][0]['value']
+				}
 
 		return doc
 
@@ -420,14 +501,17 @@ class ExchangeRate:
 		root = ET.fromstring(response.body)
 		for cube in root[1].findall('{http://www.bnr.ro/xsd}Cube'):
 			dict = cube.attrib
-			dict['date'] = str(int(time.mktime(datetime.strptime(dict['date'], '%Y-%m-%d').timetuple())))
+			exchange_rate_date = str(int(time.mktime(datetime.strptime(dict['date'], '%Y-%m-%d').timetuple())))
+			dict['_id'] = '%s:%s' % (iso, exchange_rate_date)
+			dict['date'] = exchange_rate_date
 			dict['iso'] = iso
 
 			for rate in cube.findall('{http://www.bnr.ro/xsd}Rate'):
 				if rate.attrib['currency'] == iso:
 					dict['exchange_rate'] = rate.text
 
-			doc = yield self.db.view('filter', 'by_date_and_iso', key=dict['iso']+dict['date'])
-			if not doc['rows']:
+			try:
+				doc = yield self.db.get_doc(dict['_id'])
+			except:
 				doc = yield self.db.save_doc(dict)
 		return doc

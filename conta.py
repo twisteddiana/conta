@@ -8,7 +8,7 @@ from tornado import gen
 from components.organisations.controller import OrganisationsHandler, OrganisationHandler
 from components.entity.controller import EntityHandler, EntitiesHandler, CurrencyHandler, CurrenciesHandler, ExchangeRateHandler, EntityUploadHandler
 from components.amortizations.controller import AmortizationsHandler, AmortizationHandler, AmortizationSheetHandler
-from components.reports.controller import ReportHandler, StatementHandler
+from components.reports.controller import ReportHandler, StatementHandler, ExportHandler
 from components.inventory.controller import InventoryHandler, InventoryReportHandler
 from components.expenses.controller import ExpensesHandler, ExpensesUploadHandler, ExpensesSheetHandler
 
@@ -64,6 +64,7 @@ def make_app():
         (r"/expense/(.*)", ExpensesHandler),
         (r"/expense", ExpensesHandler),
         (r"/currency/?(?P<param_name>[A-Za-z0-9-]+)?/", CurrencyHandler),
+        (r"/export", ExportHandler),
     ],  **settings)
 
 if __name__ == "__main__":

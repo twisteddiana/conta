@@ -9,14 +9,16 @@ angular
       'journal': { action: 'journal', yearly: false, classification: true },
       'registry': { action: 'registry', yearly: true, classification: false },
       'fiscal_evidence': { action: 'fiscal_evidence', yearly: true, classification: false },
-      'inventory': { action: 'inventory', yearly: true, classification: false }
+      'inventory': { action: 'inventory', yearly: true, classification: false },
+      'export': { action: 'export', yearly: false, classification: false }
     };
     $scope.reports = [
       { name: 'Fisa operatiuni diverse', type: 'sheet' },
       { name: 'Jurnal operatiuni diverse', type: 'journal' },
       { name: 'Registru de incasari si plati', type: 'registry' },
       { name: 'Registru de evidenta fiscala', type: 'fiscal_evidence' },
-      { name: 'Registru inventar', type: 'inventory' }
+      { name: 'Registru inventar', type: 'inventory' },
+      { name: 'CSV export', type: 'export' }
     ];
 
     Entity
@@ -61,15 +63,25 @@ angular
         report: config.action,
         classification: config.classification && report.classification
       };
-      if (config.action != 'inventory') {
-        Entity
-          .report(data)
-          .then(data => downloadReport(data, report))
-      } else {
-        Inventory
+
+      console.log(config);
+
+      if (config.action === 'inventory') {
+        return Inventory
           .report(data)
           .then(data => downloadReport(data, report))
       }
+
+      if (config.action === 'export') {
+        console.log('download export');
+        return Entity
+          .export(data)
+          .then(data => downloadExport(data, report))
+      }
+
+      Entity
+        .report(data)
+        .then(data => downloadReport(data, report))
     };
 
     const downloadReport = (data, report) => {
@@ -84,7 +96,21 @@ angular
       hiddenElement.download = name + '.pdf';
       hiddenElement.click();
       hiddenElement.remove();
-    }
+    };
+
+    const downloadExport = (data, report) => {
+      let name = report.name + ' ';
+      if (typeof report.month != 'undefined' && report.month > 0)
+        name += report.month + '.';
+      name += report.year;
+
+      const hiddenElement = document.createElement('a');
+      hiddenElement.href = URL.createObjectURL(new Blob([data], {type: 'text/csv'}));
+      hiddenElement.target = '_blank';
+      hiddenElement.download = name + '.csv';
+      hiddenElement.click();
+      hiddenElement.remove();
+    };
   });
 
 

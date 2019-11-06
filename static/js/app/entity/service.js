@@ -15,7 +15,8 @@ angular
     create: data => $http.post('/entity', data).then(data => data.data),
     delete: id => $http.delete(`/entity/${id}`).then(data => data.data),
     report: data => $http.post('/report', data,  { responseType: 'arraybuffer' }).then(data => data.data),
-    statement: data => $http.post('/statement', data).then(data => data.data)
+    statement: data => $http.post('/statement', data).then(data => data.data),
+    export: data => $http.post('/export', data).then(data => data.data),
   }));
 
 angular

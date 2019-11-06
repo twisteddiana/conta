@@ -91,3 +91,18 @@ class StatementHandler(tornado.web.RequestHandler):
 
 		result = yield entity.statement(query)
 		self.write(result)
+
+
+class ExportHandler(tornado.web.RequestHandler):
+	@gen.coroutine
+	def post(self):
+		if self.request.body != b'':
+			query = tornado.escape.json_decode(self.request.body)
+		else:
+			query = {}
+
+		entity = Entity()
+		entity.initialise()
+
+		result = yield entity.export(query)
+		self.write(result)

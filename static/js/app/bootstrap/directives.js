@@ -18,7 +18,7 @@ angular
 
             ExchangeRates
               .get(currency.iso)
-              .then(exchange_rate => currency.exchange_rate = exchange_rate.rows[0].value);
+              .then(exchange_rate => currency.exchange_rate = exchange_rate.exchange_rate);
           })
         });
     }}));

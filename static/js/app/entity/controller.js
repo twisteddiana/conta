@@ -2,6 +2,7 @@
  * Created by Diana on 11/20/2016.
  */
 const utils = require('../utils');
+const moment = require('moment');
 
 angular
   .module('Conta')
@@ -188,7 +189,7 @@ angular
       if ($scope.item.currency != $scope.main_currency && $scope.item.date) {
         ExchangeRates
           .get($scope.item.currency, $scope.item.date)
-          .then((data) =>  $scope.exchange_rate = data.rows[0].value);
+          .then((data) =>  $scope.exchange_rate = data.exchange_rate);
       } else {
         $scope.exchange_rate = 1;
       }
