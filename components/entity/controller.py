@@ -1,4 +1,6 @@
-from components.entity.entity import Entity, Currency, ExchangeRate
+from components.entity.entity import Entity
+from components.entity.currency import Currency
+from components.entity.exchange_rate import ExchangeRate
 import tornado.web
 from tornado import gen
 import couch

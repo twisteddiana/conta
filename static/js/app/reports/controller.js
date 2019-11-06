@@ -64,8 +64,6 @@ angular
         classification: config.classification && report.classification
       };
 
-      console.log(config);
-
       if (config.action === 'inventory') {
         return Inventory
           .report(data)
@@ -73,7 +71,6 @@ angular
       }
 
       if (config.action === 'export') {
-        console.log('download export');
         return Entity
           .export(data)
           .then(data => downloadExport(data, report))

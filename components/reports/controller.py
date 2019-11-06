@@ -1,9 +1,10 @@
-from components.entity.entity import Entity, Currency, ExchangeRate
+from components.entity.entity import Entity
 from components.amortizations.amortization import Amortization
+from components.entity.entity_report import EntityReport
 import tornado.web
 from tornado import gen
-import couch
 import pdfkit
+
 
 class ReportHandler(tornado.web.RequestHandler):
 	@gen.coroutine
@@ -44,7 +45,7 @@ class ReportHandler(tornado.web.RequestHandler):
 
 	@gen.coroutine
 	def general_report(self, query):
-		entity = Entity()
+		entity = EntityReport()
 		entity.initialise()
 
 		result = yield entity.report(query)
@@ -56,7 +57,7 @@ class ReportHandler(tornado.web.RequestHandler):
 
 	@gen.coroutine
 	def registry_report(self, query):
-		entity = Entity()
+		entity = EntityReport()
 		entity.initialise()
 
 		result = yield entity.report(query)
@@ -68,7 +69,7 @@ class ReportHandler(tornado.web.RequestHandler):
 
 	@gen.coroutine
 	def fiscal_evidence_report(self, query):
-		entity = Entity()
+		entity = EntityReport()
 		entity.initialise()
 
 		result = yield entity.fiscal_evidence_report(query)
@@ -86,7 +87,7 @@ class StatementHandler(tornado.web.RequestHandler):
 		else:
 			query = {}
 
-		entity = Entity()
+		entity = EntityReport()
 		entity.initialise()
 
 		result = yield entity.statement(query)
@@ -101,7 +102,7 @@ class ExportHandler(tornado.web.RequestHandler):
 		else:
 			query = {}
 
-		entity = Entity()
+		entity = EntityReport()
 		entity.initialise()
 
 		result = yield entity.export(query)

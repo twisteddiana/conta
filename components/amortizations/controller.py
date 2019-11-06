@@ -2,9 +2,8 @@ from components.amortizations.amortization import Amortization
 from components.entity.entity import Entity
 import tornado.web
 from tornado import gen
-import couch
 import pdfkit
-import datetime
+
 
 class AmortizationsHandler(tornado.web.RequestHandler):
 	@gen.coroutine

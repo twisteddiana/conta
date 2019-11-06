@@ -1,8 +1,8 @@
 from components.couch import MyAsyncCouch
 from tornado import gen
-import time
-from datetime import date, datetime, timedelta
 from components.entity.entity import Entity
+from components.lib.moment import *
+
 
 class Expenses:
 	db = None
@@ -28,7 +28,7 @@ class Expenses:
 	def post(self, doc):
 		doc['date_clear'] = doc['date']
 		doc['deductible_amount'] = round(doc['deductible_amount'], 2)
-		doc['date'] = int(time.mktime(datetime.strptime(doc['date'], '%d-%m-%Y').timetuple()))
+		doc['date'] = timestamp(get_date(doc['date']))
 
 		document = yield self.db.save_doc(doc)
 		entity = Entity()
@@ -72,7 +72,7 @@ class Expenses:
 	@gen.coroutine
 	def delete(self, id):
 		has_doc = yield self.db.has_doc(id)
-		if (has_doc):
+		if has_doc:
 			doc = yield self.db.get_doc(id)
 			doc = yield self.db.delete_doc(doc)
 		else:

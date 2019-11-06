@@ -3,6 +3,9 @@
         font-family: 'Open Sans', sans-serif;
         font-size: 13px;
     }
+    td.small {
+        font-size: 12px;
+    }
     .text-center {
         text-align: center;
     }
@@ -50,8 +53,17 @@
                 {{ transaction['document_type'] }} <br>
                 {{ transaction['document_number'] }}
             </td>
-            <td>
+            {% if len(transaction['description']) > 26 and transaction['foreign_currency_amount'] != ''  %}
+            {% set tdclass = 'small' %}
+            {% else %}
+            {% set tdclass = '' %}
+            {% end %}
+            <td class="{{ tdclass }}">
                 {{ transaction['description'] }}
+                {% if transaction['foreign_currency_amount'] != '' %}
+                <br>
+                {{ transaction['foreign_currency_amount'] }}
+                {% end %}
             </td>
             <td>
                 {% if transaction['type'] == 'income' %}
