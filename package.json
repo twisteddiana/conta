@@ -18,7 +18,7 @@
   "homepage": "https://github.com/twisteddiana/conta#readme",
   "dependencies": {
     "@uirouter/angularjs": "^1.0.15",
-    "angular": "^1.6.9",
+    "angular": "^1.7.9",
     "angular-cookie": "^4.1.0",
     "angular-cookies": "^1.6.9",
     "angular-file-upload": "^2.5.0",
