@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='conta',
       version='0.1',
@@ -7,7 +7,7 @@ setup(name='conta',
       author='twisteddiana',
       author_email='',
       license='MIT',
-      packages=['conta'],
+      packages=find_packages(),
       install_requires=[
           'couch',
           'tornado',
