@@ -2,6 +2,8 @@ from components.expenses.expenses import Expenses
 import tornado.web
 from tornado import gen
 import pdfkit
+from settings.settings import settings
+
 
 class ExpensesHandler(tornado.web.RequestHandler):
 	@gen.coroutine
@@ -85,10 +87,7 @@ class ExpensesSheetHandler(tornado.web.RequestHandler):
 		doc = yield expenses.prepareSheet(id)
 		if doc:
 			html = self.render_string("reports/expenses.html", item=doc)
-
-			path_wkthmltopdf = b'C:\Program Files\wkhtmltopdf\\bin\wkhtmltopdf.exe'
-			config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
-			my_pdf = pdfkit.from_string(html.decode('utf-8'), None, configuration=config)
+			my_pdf = pdfkit.from_string(html.decode('utf-8'), None, configuration=settings['pdfkit_config'])
 			self.write(my_pdf)
 		else:
 			self.write('')

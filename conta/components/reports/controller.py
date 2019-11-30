@@ -3,6 +3,7 @@ from components.entity.entity_report import EntityReport
 import tornado.web
 from tornado import gen
 import pdfkit
+from settings.settings import settings
 
 
 class ReportHandler(tornado.web.RequestHandler):
@@ -26,9 +27,7 @@ class ReportHandler(tornado.web.RequestHandler):
 			# registry
 			html = yield self.registry_report(query)
 
-		path_wkthmltopdf = b'C:\Program Files\wkhtmltopdf\\bin\wkhtmltopdf.exe'
-		config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
-		my_pdf = pdfkit.from_string(html.decode('utf-8'), None, configuration=config)
+		my_pdf = pdfkit.from_string(html.decode('utf-8'), None, configuration=settings['pdfkit_config'])
 		self.write(my_pdf)
 
 	@gen.coroutine
