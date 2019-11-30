@@ -9,14 +9,14 @@ require('@uirouter/angularjs');
 require('angular-ui-router-menus');
 require('sweetalert2');
 require('angular-sweetalert');
-require('angular-sanitize')
+require('angular-sanitize');
 
 const Conta = angular.module(
   'Conta',
   ['ui.router', 'ui.router.menus', 'ui.mask', 'oitozero.ngSweetAlert', 'ngCookies', 'ngSanitize']
 );
 Conta.run(['$rootScope', '$location', function ($rootScope, $location) {
-  if ($location.path() == '') {
+  if ($location.path() === '') {
     $location.path('/dashboard');
   }
 }]);

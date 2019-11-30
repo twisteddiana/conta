@@ -1,6 +1,6 @@
 angular
   .module('Conta')
-  .controller("bootstrapCtrl", function ($scope, $http, $state, Currency) {
+  .controller('bootstrapCtrl', function ($scope, $http, $state, Currency) {
     $scope.loadCurrencies = () => {
       $scope.exchangeRate = 1;
 
@@ -12,3 +12,20 @@ angular
         });
     };
   });
+
+angular.module('Conta').controller('loginCtrl', function($scope, $state, Authorization) {
+  $scope.submit = (isValid) => {
+    if (!isValid) {
+      return;
+    }
+
+    return Authorization
+      .authenticate($scope.username, $scope.password)
+      .then(() => {
+        $state.go('app.dashboard');
+      })
+      .catch(err => {
+        $scope.error = err.statusText;
+      });
+  }
+});

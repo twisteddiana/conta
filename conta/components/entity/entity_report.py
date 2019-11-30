@@ -1,19 +1,13 @@
-from components.couch import MyAsyncCouch
+from components.couch import CouchClass
 from tornado import gen
 from components.entity.exchange_rate import ExchangeRate
 from components.lib.moment import *
 
 
-class EntityReport:
-    db = None
-
+class EntityReport(CouchClass):
     @gen.coroutine
     def initialise(self):
-        self.db = MyAsyncCouch('enitites')
-        try:
-            yield self.db.create_db()
-        except:
-            pass
+        yield super().initialise('enitites')
 
     @gen.coroutine
     def report(self, query):
@@ -181,6 +175,7 @@ class EntityReport:
                 row.append(str(dict[header]))
             csv += ','.join(row) + '\n'
 
+        exchange_rate.close()
         return csv
 
     @gen.coroutine

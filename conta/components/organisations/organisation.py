@@ -1,17 +1,11 @@
-from components.couch import MyAsyncCouch
+from components.couch import CouchClass
 from tornado import gen
 import time
 
-class Organisation:
-	db = None
-
+class Organisation(CouchClass):
 	@gen.coroutine
 	def initialise(self):
-		self.db = MyAsyncCouch('organisations')
-		try:
-			yield self.db.create_db()
-		except:
-			pass
+		yield super().initialise('organisations')
 
 	@gen.coroutine
 	def get(self, id):
@@ -47,7 +41,7 @@ class Organisation:
 		return result
 
 	@gen.coroutine
-	def reducedCollection(self, view_name):
+	def reduced_collection(self, view_name):
 		result = yield self.db.view('reduced', view_name)
 		return result
 

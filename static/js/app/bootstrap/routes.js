@@ -21,6 +21,21 @@ angular
           '': {
             templateUrl: 'static/templates/utils/index.html'
           }
-        }
+        },
+        resolve: {
+            authorize: ['Authorization', function (Authorization) {
+              return Authorization.authorize();
+            }]
+        },
       })
+      .state('login', {
+        url: '^/login',
+        templateUrl: 'static/templates/components/login/login.html',
+        controller: 'loginCtrl',
+        data: {
+          requireLogin: false, // this property will apply to all children of 'app'
+          displayName: 'Login'
+        },
+      })
+
   });

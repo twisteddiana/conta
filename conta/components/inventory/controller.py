@@ -17,6 +17,7 @@ class InventoryHandler(tornado.web.RequestHandler):
 
 		docs = yield inventory.collection(params)
 		self.write(docs)
+		inventory.close()
 
 	@gen.coroutine
 	def get(self, id):
@@ -27,6 +28,7 @@ class InventoryHandler(tornado.web.RequestHandler):
 			self.set_status(404)
 		else:
 			self.write(doc)
+		inventory.close()
 
 	@gen.coroutine
 	def put(self):
@@ -35,6 +37,7 @@ class InventoryHandler(tornado.web.RequestHandler):
 		inventory.initialise()
 		doc = yield inventory.post(dict)
 		self.write(doc)
+		inventory.close()
 
 	@gen.coroutine
 	def delete(self, id):
@@ -43,6 +46,7 @@ class InventoryHandler(tornado.web.RequestHandler):
 
 		doc = yield inventory.delete(id)
 		self.write(doc)
+		inventory.close()
 
 class InventoryReportHandler(tornado.web.RequestHandler):
 	@gen.coroutine
@@ -60,3 +64,4 @@ class InventoryReportHandler(tornado.web.RequestHandler):
 
 		my_pdf = pdfkit.from_string(html.decode('utf-8'), None, configuration=settings['pdfkit_config'])
 		self.write(my_pdf)
+		inventory.close()

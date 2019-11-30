@@ -1,19 +1,13 @@
-from components.couch import MyAsyncCouch
+from components.couch import CouchClass
 from tornado import gen
 from components.entity.entity import Entity
 from components.lib.moment import *
 
 
-class Expenses:
-	db = None
-
+class Expenses(CouchClass):
 	@gen.coroutine
 	def initialise(self):
-		self.db = MyAsyncCouch('expenses')
-		try:
-			yield self.db.create_db()
-		except:
-			pass
+		yield super().initialise('expenses')
 
 	@gen.coroutine
 	def get(self, id):

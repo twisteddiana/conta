@@ -1,22 +1,16 @@
-from components.couch import MyAsyncCouch
+from components.couch import CouchClass
 from tornado import gen
 
 
-class Currency:
-    db = None
-
+class Currency(CouchClass):
     @gen.coroutine
     def initialise(self):
-        self.db = MyAsyncCouch('currencies')
-        try:
-            yield self.db.create_db()
-        except:
-            pass
+        yield super().initialise('currencies')
 
     @gen.coroutine
     def get(self, id):
         has_doc = yield self.db.has_doc(id)
-        if (has_doc):
+        if has_doc:
             doc = yield self.db.get_doc(id)
         else:
             doc = None

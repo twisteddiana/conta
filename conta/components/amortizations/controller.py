@@ -21,6 +21,7 @@ class AmortizationsHandler(tornado.web.RequestHandler):
 			for doc in docs['rows']:
 				doc['doc']['liquidated'] = yield amortization.liquidated(doc['id'])
 		self.write(docs)
+		amortization.close()
 
 	@gen.coroutine
 	def get(self):
@@ -29,10 +30,12 @@ class AmortizationsHandler(tornado.web.RequestHandler):
 		amortization = Amortization()
 		amortization.initialise()
 
-		#delete existent entries
+		# delete existent entries
 		yield entity.remove_amortization()
-		#create new entries
-		result = yield amortization.synchronize()
+		# create new entries
+		yield amortization.synchronize()
+		amortization.close()
+		entity.close()
 
 
 class AmortizationHandler(tornado.web.RequestHandler):
@@ -53,6 +56,7 @@ class AmortizationHandler(tornado.web.RequestHandler):
 		amortization.initialise()
 		doc = yield amortization.post(dict)
 		self.write(doc)
+		amortization.close()
 
 	@gen.coroutine
 	def delete(self, id):
@@ -63,6 +67,8 @@ class AmortizationHandler(tornado.web.RequestHandler):
 			self.set_status(404)
 		else:
 			self.write(doc)
+		amortization.close()
+
 
 class AmortizationSheetHandler(tornado.web.RequestHandler):
 	@gen.coroutine
@@ -78,3 +84,4 @@ class AmortizationSheetHandler(tornado.web.RequestHandler):
 			self.write(my_pdf)
 		else:
 			self.write('')
+		amortization.close()

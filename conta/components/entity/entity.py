@@ -1,19 +1,13 @@
-from components.couch import MyAsyncCouch
+from components.couch import CouchClass
 from tornado import gen
 import time
 from datetime import datetime
 
 
-class Entity:
-	db = None
-
+class Entity(CouchClass):
 	@gen.coroutine
 	def initialise(self):
-		self.db = MyAsyncCouch('enitites')
-		try:
-			yield self.db.create_db()
-		except:
-			pass
+		yield super().initialise('enitites')
 
 	@gen.coroutine
 	def get(self, id):

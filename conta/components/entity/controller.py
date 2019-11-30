@@ -28,6 +28,7 @@ class EntitiesHandler(tornado.web.RequestHandler):
 		else:
 			docs = yield entity.reduce(dict)
 			self.write(docs)
+		entity.close()
 
 
 class EntityHandler(tornado.web.RequestHandler):
@@ -40,6 +41,7 @@ class EntityHandler(tornado.web.RequestHandler):
 			self.set_status(404)
 		else:
 			self.write(doc)
+		entity.close()
 
 	@gen.coroutine
 	def post(self):
@@ -48,6 +50,7 @@ class EntityHandler(tornado.web.RequestHandler):
 		entity.initialise()
 		doc = yield entity.post(dict)
 		self.write(doc)
+		entity.close()
 
 	@gen.coroutine
 	def delete(self, id):
@@ -58,6 +61,8 @@ class EntityHandler(tornado.web.RequestHandler):
 			self.set_status(404)
 		else:
 			self.write(doc)
+		entity.close()
+
 
 class CurrenciesHandler(tornado.web.RequestHandler):
 	@gen.coroutine
@@ -69,6 +74,8 @@ class CurrenciesHandler(tornado.web.RequestHandler):
 			self.write(docs)
 		except couch.couch.CouchException as err:
 			print(err)
+		currency.close()
+
 
 class CurrencyHandler(tornado.web.RequestHandler):
 	@gen.coroutine
@@ -80,6 +87,8 @@ class CurrencyHandler(tornado.web.RequestHandler):
 			self.set_status(404)
 		else:
 			self.write(doc)
+		currency.close()
+
 
 class ExchangeRateHandler(tornado.web.RequestHandler):
 	@gen.coroutine
@@ -88,6 +97,8 @@ class ExchangeRateHandler(tornado.web.RequestHandler):
 		exchange_rate.initialise()
 		doc = yield exchange_rate.get(iso, request_date)
 		self.write(doc)
+		exchange_rate.close()
+
 
 class EntityUploadHandler(tornado.web.RequestHandler):
 	@gen.coroutine
@@ -100,6 +111,7 @@ class EntityUploadHandler(tornado.web.RequestHandler):
 			post_entity = { '_id': result['id'], '_rev': result['rev'] }
 
 		self.write(post_entity)
+		entity.close()
 
 	@gen.coroutine
 	def post(self, attachment_name):
@@ -109,6 +121,7 @@ class EntityUploadHandler(tornado.web.RequestHandler):
 
 		result = yield entity.get_attachment(doc, attachment_name)
 		self.write(result)
+		entity.close()
 
 	@gen.coroutine
 	def delete(self):
@@ -121,3 +134,4 @@ class EntityUploadHandler(tornado.web.RequestHandler):
 
 		result = yield entity.delete_attachment(doc, self.get_argument('name'))
 		self.write(result)
+		entity.close()

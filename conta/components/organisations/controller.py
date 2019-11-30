@@ -17,13 +17,15 @@ class OrganisationsHandler(tornado.web.RequestHandler):
 			self.write(docs)
 		except couch.couch.CouchException as err:
 			print(err)
+		organisation.close()
 
 	@gen.coroutine
 	def get(self, view_name):
 		organisation = Organisation()
 		organisation.initialise()
-		docs = yield organisation.reducedCollection(view_name)
+		docs = yield organisation.reduced_collection(view_name)
 		self.write(docs)
+		organisation.close()
 
 
 class OrganisationHandler(tornado.web.RequestHandler):
@@ -36,6 +38,7 @@ class OrganisationHandler(tornado.web.RequestHandler):
 			self.set_status(404)
 		else:
 			self.write(doc)
+		organisation.close()
 
 	@gen.coroutine
 	def post(self):
@@ -44,6 +47,7 @@ class OrganisationHandler(tornado.web.RequestHandler):
 		organisation.initialise()
 		doc = yield organisation.post(dict)
 		self.write(doc)
+		organisation.close()
 
 	@gen.coroutine
 	def delete(self, id):
@@ -54,3 +58,4 @@ class OrganisationHandler(tornado.web.RequestHandler):
 			self.set_status(404)
 		else:
 			self.write(doc)
+		organisation.close()

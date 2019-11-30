@@ -39,6 +39,7 @@ class ReportHandler(tornado.web.RequestHandler):
 		html = self.render_string("reports/" + query['report'] + '.html', classification=query['classification'],
 								report=result['report'], transactions=result['transactions'])
 
+		amortization.close()
 		return html
 
 	@gen.coroutine
@@ -50,7 +51,7 @@ class ReportHandler(tornado.web.RequestHandler):
 
 		html = self.render_string("reports/" + query['report'] + '.html', classification=query['classification'],
 								report=result['report'], transactions=result['transactions'])
-
+		entity.close()
 		return html
 
 	@gen.coroutine
@@ -62,7 +63,7 @@ class ReportHandler(tornado.web.RequestHandler):
 
 		html = self.render_string("reports/" + query['report'] + '.html',
 								report=result['report'], transactions=result['transactions'])
-
+		entity.close()
 		return html
 
 	@gen.coroutine
@@ -74,7 +75,7 @@ class ReportHandler(tornado.web.RequestHandler):
 
 		html = self.render_string("reports/" + query['report'] + '.html',
 								year=result['year'], classifications=result['classifications'])
-
+		entity.close()
 		return html
 
 class StatementHandler(tornado.web.RequestHandler):
@@ -90,6 +91,7 @@ class StatementHandler(tornado.web.RequestHandler):
 
 		result = yield entity.statement(query)
 		self.write(result)
+		entity.close()
 
 
 class ExportHandler(tornado.web.RequestHandler):
@@ -105,3 +107,4 @@ class ExportHandler(tornado.web.RequestHandler):
 
 		result = yield entity.export(query)
 		self.write(result)
+		entity.close()

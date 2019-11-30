@@ -1,21 +1,15 @@
-from components.couch import MyAsyncCouch
+from components.couch import CouchClass
 from tornado import gen
-from tornado.httpclient import  AsyncHTTPClient
+from tornado.httpclient import AsyncHTTPClient
 import xml.etree.ElementTree as ET
 from components.entity.currency import Currency
 from components.lib.moment import *
 
 
-class ExchangeRate:
-    db = None
-
+class ExchangeRate(CouchClass):
     @gen.coroutine
     def initialise(self):
-        self.db = MyAsyncCouch('exchange_rates')
-        try:
-            yield self.db.create_db()
-        except:
-            pass
+        yield super().initialise('exchange_rates')
 
     @gen.coroutine
     def update(self):
@@ -28,6 +22,7 @@ class ExchangeRate:
             if item['doc']['iso'] != 'RON':
                 yield self.import_rates(today.year, item['doc']['iso'])
                 yield self.import_rates(today.year - 1, item['doc']['iso'])
+        currency.close()
 
     @gen.coroutine
     def post(self, dict):

@@ -1,4 +1,4 @@
-from components.couch import MyAsyncCouch
+from components.couch import CouchClass
 from tornado import gen
 import time
 from datetime import date, datetime, timedelta
@@ -17,22 +17,18 @@ def add_months(sourcedate, months):
 	day = min(sourcedate.day,calendar.monthrange(year,month)[1])
 	return date(year, month, day)
 
+
 def get_first_day(date_text):
 	date_obj = datetime.strptime(date_text, '%d-%m-%Y')
 	date_obj = add_months(date_obj, 2)
 	date_obj = date_obj - timedelta(days=date_obj.day)
 	return date_obj
 
-class Amortization:
-	db = None
 
+class Amortization(CouchClass):
 	@gen.coroutine
 	def initialise(self):
-		self.db = MyAsyncCouch('amortizations')
-		try:
-			yield self.db.create_db()
-		except:
-			pass
+		yield super().initialise('amortizations')
 
 	@gen.coroutine
 	def get(self, id):
@@ -160,6 +156,7 @@ class Amortization:
 		# save last group
 		if group is not None:
 			result = yield entity.post(group)
+		entity.close()
 
 		return result
 
@@ -275,7 +272,7 @@ class Amortization:
 			inventory_document['logs'].append(log)
 
 		result = yield inventory.post(inventory_document)
-
+		inventory.close()
 		return result
 
 

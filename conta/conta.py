@@ -11,6 +11,7 @@ from components.amortizations.controller import AmortizationsHandler, Amortizati
 from components.reports.controller import ReportHandler, StatementHandler, ExportHandler
 from components.inventory.controller import InventoryHandler, InventoryReportHandler
 from components.expenses.controller import ExpensesHandler, ExpensesUploadHandler, ExpensesSheetHandler
+from login.controller import LoginHandler
 
 is_closing = False
 
@@ -65,6 +66,7 @@ def make_app():
         (r"/expense", ExpensesHandler),
         (r"/currency/?(?P<param_name>[A-Za-z0-9-]+)?/", CurrencyHandler),
         (r"/export", ExportHandler),
+        (r"/_session", LoginHandler),
     ],  **settings)
 
 if __name__ == "__main__":
