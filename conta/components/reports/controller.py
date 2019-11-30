@@ -1,4 +1,3 @@
-from components.entity.entity import Entity
 from components.amortizations.amortization import Amortization
 from components.entity.entity_report import EntityReport
 import tornado.web

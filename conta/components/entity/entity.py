@@ -1,7 +1,7 @@
 from components.couch import MyAsyncCouch
 from tornado import gen
 import time
-from datetime import date, datetime, timedelta
+from datetime import datetime
 
 
 class Entity:

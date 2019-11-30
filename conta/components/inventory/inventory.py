@@ -1,8 +1,8 @@
 from components.couch import MyAsyncCouch
 from tornado import gen
 import time
-from datetime import date, datetime, timedelta
-import calendar
+from datetime import date, datetime
+
 
 class Inventory:
 	db = None
