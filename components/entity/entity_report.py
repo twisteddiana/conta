@@ -244,7 +244,7 @@ class EntityReport:
             pension = round(base * 12 * 25 / 100, 2)
             income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 10 / 100, 2)
         elif query['year'] == '2019':
-            base = 1900
+            base = 2080
             medical_insurance = round(base * 12 * 10 / 100, 2)
             pension = round(base * 12 * 25 / 100, 2)
             income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 10 / 100, 2)
