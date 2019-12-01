@@ -18,8 +18,7 @@ class LoginHandler(tornado.web.RequestHandler):
 
         try:
             resp = yield httpclient.AsyncHTTPClient().fetch(req)
-            print(resp)
-            print(resp.headers)
+            self.set_cookie(resp.cookies)
             self.write(resp.body)
         except httpclient.HTTPError as e:
             resp = e.response
