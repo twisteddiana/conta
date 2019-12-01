@@ -20,7 +20,7 @@ angular.module('Conta').controller('loginCtrl', function($scope, $state, Authori
     }
 
     return Authorization
-      .authenticate($scope.username, $scope.password)
+      .authenticate($scope.name, $scope.password)
       .then(() => {
         $state.go('app.dashboard');
       })

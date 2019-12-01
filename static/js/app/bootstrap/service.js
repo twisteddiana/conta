@@ -14,5 +14,5 @@ angular
           !userCtx && $state.go('login');
         })
     },
-    authenticate: (username, password) => $http.post('/_session', { username, password }).then(data => data.data),
+    authenticate: (name, password) => $http.post('/_session', { name, password }).then(data => data.data),
   }));
