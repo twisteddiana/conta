@@ -17,7 +17,6 @@ angular
     authenticate: (name, password) => {
       const config = {
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Authorization': `Basic ${window.btoa(name + ':' + password)}`
         }
