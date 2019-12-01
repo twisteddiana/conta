@@ -15,6 +15,7 @@ class LoginHandler(tornado.web.RequestHandler):
     def post(self):
         db = AsyncCouch()
         print(self.request.body)
+        print(self.request.headers)
         try:
             response = yield db._http_post('/_session', self.request.body, headers=self.request.headers)
             self.write(response)
