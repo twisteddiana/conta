@@ -11,7 +11,7 @@ class MyAsyncCouch(couch.AsyncCouch):
     @gen.coroutine
     def find(self, body):
         url = '{0}/_find'.format(self.db_name)
-        r = yield self._http_post(url, body = json_encode(body))
+        r = yield self._http_post(url, body=json_encode(body))
         raise gen.Return(r)
 
     @gen.coroutine

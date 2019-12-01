@@ -19,8 +19,6 @@ angular.module('Conta').controller('loginCtrl', function($scope, $state, Authori
       return;
     }
 
-    console.log($scope.username, $scope.password);
-
     return Authorization
       .authenticate($scope.username, $scope.password)
       .then(() => {

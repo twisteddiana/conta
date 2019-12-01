@@ -14,5 +14,15 @@ angular
           !userCtx && $state.go('login');
         })
     },
-    authenticate: (name, password) => $http.post('/_session', { name, password }).then(data => data.data),
+    authenticate: (name, password) => {
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Basic ${window.btoa(name + ':' + password)}`
+        }
+      };
+      const body = { name, password };
+      return $http.post('/_session', body, config).then(data => data.data);
+    },
   }));
