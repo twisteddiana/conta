@@ -1,7 +1,7 @@
 import tornado.web
-from tornado import gen
 from couch.couch import AsyncCouch
 from tornado import httpclient, gen
+
 
 class LoginHandler(tornado.web.RequestHandler):
     @gen.coroutine
@@ -14,8 +14,7 @@ class LoginHandler(tornado.web.RequestHandler):
     @gen.coroutine
     def post(self):
         uri = 'http://127.0.0.1:5984/_session'
-        req = httpclient.HTTPRequest(self.couch_url + uri, method='POST',
-                                     body=self.request.body, headers=self.request.headers)
+        req = httpclient.HTTPRequest(uri, method='POST', body=self.request.body, headers=self.request.headers)
 
         try:
             resp = yield httpclient.AsyncHTTPClient().fetch(req)
