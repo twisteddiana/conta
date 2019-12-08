@@ -53,12 +53,11 @@
         </tr>
         {% set to_report = report %}
         {% set month = 0 %}
-        {% set year = 0 %}
         {% set month_total = 0 %}
         {% set counter = 0 %}
         {% for transaction in transactions %}
-        {% if transaction['month'] != month or transaction['year'] != year %}
-        {% if month != 0 and year != 0 %}
+        {% if transaction['month'] != month %}
+        {% if month != 0 %}
         <tr>
             <td class="empty"></td>
             <td colspan="3">Total luna</td>
@@ -80,7 +79,6 @@
         </tr>
         {% end %}
         {% set month = transaction['month'] %}
-        {% set year = transaction['year'] %}
         {% set counter = 0 %}
         {% set month_total = 0 %}
         <tbody>
@@ -102,7 +100,7 @@
                 {{ transaction['document_type'] }} {{ transaction['document_number'] }}
             </td>
             <td>
-                {{ transaction['description'] }}
+                {{ transaction['description'] }}  {{ transaction['month'] }}
             </td>
             <td class="text-right">
                 {{ transaction['amount'] }}
