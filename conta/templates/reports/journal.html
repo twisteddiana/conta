@@ -44,11 +44,10 @@
     <table>
         {% set to_report = report %}
         {% set month = 0 %}
-        {% set year = 0 %}
         {% set counter = 0 %}
 
         {% for transaction in transactions %}
-            {% if transaction['month'] != month or transaction['year'] != year %}
+            {% if transaction['month'] != month %}
                 {% if month != 0 %}
                     <tr>
                         <td colspan="4" class="text-right">
@@ -90,7 +89,6 @@
                     </td>
                 </tr>
                 {% set month = transaction['month'] %}
-                {% set year = transaction['year'] %}
                 {% set counter = 0 %}
             {% end %}
             <tr>
