@@ -3,7 +3,7 @@ import tornado.web
 import signal
 import logging
 from tornado.options import options
-from settings.settings import settings
+from lib.settings import settings
 from tornado import gen
 from components.organisations.controller import OrganisationsHandler, OrganisationHandler
 from components.entity.controller import EntityHandler, EntitiesHandler, CurrencyHandler, CurrenciesHandler, ExchangeRateHandler, EntityUploadHandler
@@ -11,7 +11,7 @@ from components.amortizations.controller import AmortizationsHandler, Amortizati
 from components.reports.controller import ReportHandler, StatementHandler, ExportHandler
 from components.inventory.controller import InventoryHandler, InventoryReportHandler
 from components.expenses.controller import ExpensesHandler, ExpensesUploadHandler, ExpensesSheetHandler
-from login.controller import LoginHandler
+from lib.controller import LoginHandler
 
 is_closing = False
 

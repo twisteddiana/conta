@@ -1,9 +1,6 @@
-from tornado import httpclient, gen
-
+from tornado import gen
 import couch.couch
 from couch.couch import json_encode
-from tornado.escape import json_decode, url_escape
-import base64
 import os
 
 

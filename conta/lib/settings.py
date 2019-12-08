@@ -3,9 +3,10 @@ import platform
 import pdfkit
 
 settings = {
-    "template_path": os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates"),
-    "static_path": os.path.join(os.path.dirname(os.path.dirname(__file__)), "../static"),
-    "debug" : True
+    'template_path': os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates'),
+    'static_path': os.path.join(os.path.dirname(os.path.dirname(__file__)), '../static'),
+    'debug' : True,
+    'couch_url': os.environ.get('COUCH_URL') or 'http://127.0.0.1:5984/',
 }
 
 if platform.system() == 'Windows':

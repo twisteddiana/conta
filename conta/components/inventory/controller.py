@@ -2,10 +2,11 @@ from components.inventory.inventory import Inventory
 import tornado.web
 from tornado import gen
 import pdfkit
-from settings.settings import settings
+from lib import settings
+from lib.controller import ContaController
 
 
-class InventoryHandler(tornado.web.RequestHandler):
+class InventoryHandler(ContaController):
 	@gen.coroutine
 	def post(self):
 		if self.request.body != b'':
@@ -48,7 +49,7 @@ class InventoryHandler(tornado.web.RequestHandler):
 		self.write(doc)
 		inventory.close()
 
-class InventoryReportHandler(tornado.web.RequestHandler):
+class InventoryReportHandler(ContaController):
 	@gen.coroutine
 	def post(self):
 		if self.request.body != b'':

@@ -3,10 +3,11 @@ from components.entity.entity_report import EntityReport
 import tornado.web
 from tornado import gen
 import pdfkit
-from settings.settings import settings
+from lib import settings
+from lib.controller import ContaController
 
 
-class ReportHandler(tornado.web.RequestHandler):
+class ReportHandler(ContaController):
 	@gen.coroutine
 	def post(self):
 		if self.request.body != b'':
@@ -78,7 +79,7 @@ class ReportHandler(tornado.web.RequestHandler):
 		entity.close()
 		return html
 
-class StatementHandler(tornado.web.RequestHandler):
+class StatementHandler(ContaController):
 	@gen.coroutine
 	def post(self):
 		if self.request.body != b'':
@@ -94,7 +95,7 @@ class StatementHandler(tornado.web.RequestHandler):
 		entity.close()
 
 
-class ExportHandler(tornado.web.RequestHandler):
+class ExportHandler(ContaController):
 	@gen.coroutine
 	def post(self):
 		if self.request.body != b'':

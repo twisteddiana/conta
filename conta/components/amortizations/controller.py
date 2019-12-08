@@ -1,12 +1,13 @@
 from components.amortizations.amortization import Amortization
 from components.entity.entity import Entity
+from lib.controller import ContaController
 import tornado.web
 from tornado import gen
 import pdfkit
-from settings.settings import settings
+from lib import settings
 
 
-class AmortizationsHandler(tornado.web.RequestHandler):
+class AmortizationsHandler(ContaController):
 	@gen.coroutine
 	def post(self):
 		if self.request.body != b'':
@@ -38,7 +39,7 @@ class AmortizationsHandler(tornado.web.RequestHandler):
 		entity.close()
 
 
-class AmortizationHandler(tornado.web.RequestHandler):
+class AmortizationHandler(ContaController):
 	@gen.coroutine
 	def get(self, id):
 		amortization = Amortization()
@@ -70,7 +71,7 @@ class AmortizationHandler(tornado.web.RequestHandler):
 		amortization.close()
 
 
-class AmortizationSheetHandler(tornado.web.RequestHandler):
+class AmortizationSheetHandler(ContaController):
 	@gen.coroutine
 	def get(self, id):
 		amortization = Amortization()

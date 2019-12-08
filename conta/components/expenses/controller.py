@@ -1,11 +1,12 @@
 from components.expenses.expenses import Expenses
 import tornado.web
+from lib.controller import ContaController
 from tornado import gen
 import pdfkit
-from settings.settings import settings
+from lib import settings
 
 
-class ExpensesHandler(tornado.web.RequestHandler):
+class ExpensesHandler(ContaController):
     @gen.coroutine
     def post(self):
         if self.request.body != b'':
@@ -49,7 +50,7 @@ class ExpensesHandler(tornado.web.RequestHandler):
         expenses.close()
 
 
-class ExpensesUploadHandler(tornado.web.RequestHandler):
+class ExpensesUploadHandler(ContaController):
     @gen.coroutine
     def put(self):
         result = {}
@@ -86,7 +87,7 @@ class ExpensesUploadHandler(tornado.web.RequestHandler):
         expense.close()
 
 
-class ExpensesSheetHandler(tornado.web.RequestHandler):
+class ExpensesSheetHandler(ContaController):
     @gen.coroutine
     def get(self, id):
         expenses = Expenses()

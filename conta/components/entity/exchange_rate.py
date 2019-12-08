@@ -3,7 +3,7 @@ from tornado import gen
 from tornado.httpclient import AsyncHTTPClient
 import xml.etree.ElementTree as ET
 from components.entity.currency import Currency
-from components.lib.moment import *
+from lib.moment import *
 
 
 class ExchangeRate(CouchClass):

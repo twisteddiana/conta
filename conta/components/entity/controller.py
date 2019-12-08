@@ -2,10 +2,12 @@ from components.entity.entity import Entity
 from components.entity.currency import Currency
 from components.entity.exchange_rate import ExchangeRate
 import tornado.web
+from lib.controller import ContaController
 from tornado import gen
 import couch
 
-class EntitiesHandler(tornado.web.RequestHandler):
+
+class EntitiesHandler(ContaController):
 	@gen.coroutine
 	def post(self):
 		if self.request.body != b'':
@@ -31,7 +33,7 @@ class EntitiesHandler(tornado.web.RequestHandler):
 		entity.close()
 
 
-class EntityHandler(tornado.web.RequestHandler):
+class EntityHandler(ContaController):
 	@gen.coroutine
 	def get(self, id):
 		entity = Entity()
@@ -64,7 +66,7 @@ class EntityHandler(tornado.web.RequestHandler):
 		entity.close()
 
 
-class CurrenciesHandler(tornado.web.RequestHandler):
+class CurrenciesHandler(ContaController):
 	@gen.coroutine
 	def get(self):
 		currency = Currency()
@@ -77,7 +79,7 @@ class CurrenciesHandler(tornado.web.RequestHandler):
 		currency.close()
 
 
-class CurrencyHandler(tornado.web.RequestHandler):
+class CurrencyHandler(ContaController):
 	@gen.coroutine
 	def get(self, **params):
 		currency = Currency()
@@ -90,7 +92,7 @@ class CurrencyHandler(tornado.web.RequestHandler):
 		currency.close()
 
 
-class ExchangeRateHandler(tornado.web.RequestHandler):
+class ExchangeRateHandler(ContaController):
 	@gen.coroutine
 	def get(self, iso, request_date = None):
 		exchange_rate = ExchangeRate()
@@ -100,7 +102,7 @@ class ExchangeRateHandler(tornado.web.RequestHandler):
 		exchange_rate.close()
 
 
-class EntityUploadHandler(tornado.web.RequestHandler):
+class EntityUploadHandler(ContaController):
 	@gen.coroutine
 	def put(self):
 		post_entity = tornado.escape.json_decode(self.get_body_argument("entity"))

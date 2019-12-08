@@ -2,8 +2,10 @@ from components.organisations.organisation import Organisation
 import tornado.web
 from tornado import gen
 import couch
+from lib.controller import ContaController
 
-class OrganisationsHandler(tornado.web.RequestHandler):
+
+class OrganisationsHandler(ContaController):
 	@gen.coroutine
 	def post(self):
 		if self.request.body != b'':
@@ -28,7 +30,7 @@ class OrganisationsHandler(tornado.web.RequestHandler):
 		organisation.close()
 
 
-class OrganisationHandler(tornado.web.RequestHandler):
+class OrganisationHandler(ContaController):
 	@gen.coroutine
 	def get(self, id):
 		organisation = Organisation()
