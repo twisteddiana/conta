@@ -1,7 +1,7 @@
 from components.couch import CouchClass
 from tornado import gen
 import time
-from datetime import datetime
+from lib.moment import *
 
 
 class Entity(CouchClass):
@@ -25,7 +25,8 @@ class Entity(CouchClass):
 		else:
 			dict['date_added'] = int(time.time())
 		dict['date_clear'] = dict['date']
-		dict['date'] = int(time.mktime(datetime.strptime(dict['date'], '%d-%m-%Y').timetuple()))
+
+		dict['date'] = timestamp(get_date(dict['date'], '%d-%m-%Y'))
 		dict['real_amount'] = round(dict['real_amount'], 2)
 		doc = yield self.db.save_doc(dict)
 		return doc

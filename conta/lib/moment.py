@@ -1,5 +1,4 @@
-from datetime import date, datetime, timedelta
-import time
+from datetime import datetime, timedelta, date
 import calendar
 
 
@@ -14,7 +13,7 @@ def subtract(date_obj, **kwargs):
 
 def add(date_obj, **kwargs):
     delta = timedelta(**kwargs)
-    return date_obj + delta;
+    return date_obj + delta
 
 
 def start_of_year(date_obj):
@@ -22,7 +21,7 @@ def start_of_year(date_obj):
 
 
 def timestamp(date_obj):
-    return int(time.mktime(date_obj.timetuple()))
+    return calendar.timegm(date_obj.utctimetuple())
 
 
 def start_of_month(date_obj):

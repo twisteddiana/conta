@@ -1,8 +1,8 @@
 from components.couch import CouchClass
 from tornado import gen
 import time
-from datetime import date, datetime, timedelta
-import calendar
+from datetime import date
+from lib.moment import *
 from components.entity.entity import Entity
 from components.inventory.inventory import Inventory
 import math
@@ -48,7 +48,7 @@ class Amortization(CouchClass):
 
 		doc['date_clear'] = doc['date']
 		initial_date = get_first_day(doc['date'])
-		doc['date'] = int(time.mktime(datetime.strptime(doc['date'], '%d-%m-%Y').timetuple()))
+		doc['date'] = timestamp(get_date(doc['date'], '%d-%m-%Y'))
 		last_date = add_months(initial_date, doc['duration'])
 		doc['last_date'] = int(time.mktime(last_date.timetuple()))
 		doc['last_date_clear'] = last_date.strftime('%d-%m-%Y')
@@ -126,7 +126,7 @@ class Amortization(CouchClass):
 		month = 0
 		year = 0
 		for item in result['rows']:
-			item_date = date.fromtimestamp(item['doc']['date'])
+			item_date = datetime.fromtimestamp(item['doc']['date'])
 			if item_date.month == month and item_date.year == year:
 				group['amount'] += item['doc']['amount']
 				group['real_amount'] += item['doc']['amount']

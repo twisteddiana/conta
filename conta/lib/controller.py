@@ -14,9 +14,7 @@ class ContaController(tornado.web.RequestHandler):
         req = httpclient.HTTPRequest(uri, method='GET', headers=headers)
         try:
             resp = yield httpclient.AsyncHTTPClient().fetch(req)
-            print(resp.body)
         except httpclient.HTTPError as e:
-            print(e.response.body)
             self.set_status(401)
             self.finish(e.response.body)
 

@@ -32,7 +32,7 @@ class ExchangeRate(CouchClass):
     @gen.coroutine
     def get(self, iso, request_date=None, import_rates=True):
         if request_date is None:
-            request_date = last_working_day(date.today())
+            request_date = last_working_day(datetime.combine(date.today(), datetime.min.time()))
         else:
             request_date = last_working_day(get_date(request_date))
         request_timestamp = str(timestamp(request_date))
@@ -68,7 +68,7 @@ class ExchangeRate(CouchClass):
         root = ET.fromstring(response.body)
         for cube in root[1].findall('{http://www.bnr.ro/xsd}Cube'):
             dict = cube.attrib
-            exchange_rate_date = str(int(time.mktime(datetime.strptime(dict['date'], '%Y-%m-%d').timetuple())))
+            exchange_rate_date = timestamp(get_date(dict['date'], '%Y-%m-%d'))
             dict['_id'] = '%s:%s' % (iso, exchange_rate_date)
             dict['date'] = exchange_rate_date
             dict['iso'] = iso
