@@ -2,7 +2,6 @@
  * Created by Diana on 11/20/2016.
  */
 const utils = require('../utils');
-const moment = require('moment');
 
 angular
   .module('Conta')
@@ -64,7 +63,7 @@ angular
           $scope.rows = data.rows;
           $scope.pages = Math.ceil($scope.total_rows/$scope.limit);
         })
-    }
+    };
 
     $scope.execute_filter = () =>  {
       const params = $scope.getListParams();
@@ -98,7 +97,7 @@ angular
           $scope.rows = data.rows;
           $scope.pages = Math.ceil($scope.total_rows/$scope.limit);
         })
-    }
+    };
 
     $scope.display_filter = () => $scope.show_filter = !$scope.show_filter;
 

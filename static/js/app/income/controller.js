@@ -62,7 +62,7 @@ angular
             if ($scope.attachments) {
               EntityAttachmentUpload
                 .upload($scope.attachments, $scope.item)
-                .then(() => $state.go('app.payments'));
+                .then(() => $state.go('app.income'));
             } else {
               $state.go('app.income');
             }
@@ -107,7 +107,7 @@ angular
           if ($scope.attachments.length) {
             EntityAttachmentUpload
               .upload($scope.attachments, $scope.item)
-              .then(() => $state.go('app.payments'));
+              .then(() => $state.go('app.income'));
           } else {
             $state.go('app.income');
           }
