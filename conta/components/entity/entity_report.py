@@ -1,6 +1,7 @@
 from components.couch import CouchClass
 from tornado import gen
 from components.entity.exchange_rate import ExchangeRate
+from lib.moment import *
 
 
 class EntityReport(CouchClass):

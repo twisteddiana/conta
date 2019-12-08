@@ -3,7 +3,7 @@ from components.entity.entity_report import EntityReport
 import tornado.web
 from tornado import gen
 import pdfkit
-from lib import settings
+from lib.settings import settings
 from lib.controller import ContaController
 
 
