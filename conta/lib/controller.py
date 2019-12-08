@@ -7,9 +7,10 @@ class ContaController(tornado.web.RequestHandler):
     @gen.coroutine
     def prepare(self):
         uri = settings['couch_url'] + '/_session'
-        headers = {
-            'Cookie': self.request.headers['Cookie']
-        }
+        headers = {}
+        if 'Cookie' in self.request.headers:
+            headers['Cookie'] = self.request.headers['Cookie']
+
         req = httpclient.HTTPRequest(uri, method='GET', headers=headers)
         try:
             resp = yield httpclient.AsyncHTTPClient().fetch(req)
