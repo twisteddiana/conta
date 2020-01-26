@@ -79,6 +79,7 @@ class ExchangeRate(CouchClass):
                     dict['exchange_rate'] = rate.text
 
             try:
+                print(dict['_id'])
                 doc = yield self.db.get_doc(dict['_id'])
             except:
                 doc = yield self.db.save_doc(dict)
