@@ -118,6 +118,9 @@ class EntityReport(CouchClass):
                 transactions.append(transaction)
                 total += round(transaction['amount'], 2)
 
+            if len(transactions) == 0:
+                continue
+
             classifications.append({
                 'name': classification_name,
                 'transactions': transactions,
