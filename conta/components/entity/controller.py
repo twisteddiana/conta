@@ -97,7 +97,7 @@ class ExchangeRateHandler(ContaController):
 	def get(self, iso, request_date = None):
 		exchange_rate = ExchangeRate()
 		exchange_rate.initialise()
-		doc = yield exchange_rate.get(iso, request_date)
+		doc = yield exchange_rate.get(iso, request_date, True)
 		self.write(doc)
 		exchange_rate.close()
 

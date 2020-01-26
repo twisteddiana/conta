@@ -31,7 +31,6 @@ class ExchangeRate(CouchClass):
 
     @gen.coroutine
     def get(self, iso, request_date=None, import_rates=True):
-        print(request_date)
         if request_date is None:
             request_date = last_working_day(datetime.combine(date.today(), datetime.min.time()))
         else:
@@ -79,7 +78,6 @@ class ExchangeRate(CouchClass):
                     dict['exchange_rate'] = rate.text
 
             try:
-                print(dict['_id'])
                 doc = yield self.db.get_doc(dict['_id'])
             except:
                 doc = yield self.db.save_doc(dict)
