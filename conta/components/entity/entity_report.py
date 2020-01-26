@@ -102,6 +102,8 @@ class EntityReport(CouchClass):
                 transaction_date = datetime.fromtimestamp(row['doc']['date'])
                 amount = row['doc']['deductible_amount'] if 'deductible_amount' in row['doc'] else row['doc'][
                     'real_amount']
+                if amount == 0:
+                    continue
                 transaction = {
                     'date': row['doc']['date_clear'],
                     'document_type': row['doc']['document_type'],
