@@ -150,6 +150,7 @@ angular
             .delete(attachment_name, $scope.item)
             .then(result => {
               delete $scope.item._attachments[attachment_name];
+              console.log($scope.item._attachments);
               $scope.item._rev = result.rev;
             }));
 
