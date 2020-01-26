@@ -3,7 +3,7 @@ import tornado.web
 from lib.controller import ContaController
 from tornado import gen
 import pdfkit
-from lib import settings
+from lib.settings import settings
 
 
 class ExpensesHandler(ContaController):
