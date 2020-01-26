@@ -150,7 +150,6 @@ angular
             .delete(attachment_name, $scope.item)
             .then(result => {
               delete $scope.item._attachments[attachment_name];
-              console.log($scope.item._attachments);
               $scope.item._rev = result.rev;
             }));
 
@@ -193,7 +192,10 @@ angular
           },
           isConfirm => isConfirm && EntityAttachmentUpload
             .delete(attachment_name, $scope.item)
-            .then(data => $scope.item._rev = data.rev));
+            .then(data => {
+              delete $scope.item._attachments[attachment_name];
+              $scope.item._rev = data.rev;
+            }));
 
       $scope.getAttachment = (attachment_name, attachment) => {
         const attach = {};
