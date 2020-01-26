@@ -135,12 +135,12 @@ angular
     $scope.title = 'Modificare';
     $scope.subtitle = 'Cheltuieli';
     $scope.entityID = $stateParams.entityID;
-    $scope.item = {}
+    $scope.item = {};
     Expenses.get($scope.entityID).then((data) => {
       $scope.item = data;
       $scope.item.date = $scope.item.date_clear;
       $scope.subtitle = $scope.item.name;
-    })
+    });
 
     $controller('bootstrapCtrl', { $scope });
     $scope.loadCurrencies();

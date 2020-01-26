@@ -148,10 +148,13 @@ angular
           },
           isConfirm => isConfirm && ExpensesAttachmentUpload
             .delete(attachment_name, $scope.item)
-            .then(result => $scope.item._rev = result.rev));
+            .then(result => {
+              delete $scope.item._attachments[attachment_name];
+              $scope.item._rev = result.rev;
+            }));
 
       $scope.getAttachment = (attachment_name, attachment) => {
-        const attach = {}
+        const attach = {};
         attach[attachment_name] = attachment;
         const doc = { _id: $scope.item._id, _attachments: attach };
 
