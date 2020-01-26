@@ -82,7 +82,6 @@ angular
           }
           if (filter.value.end_key) {
             date_filter.end_key =  utils.parseDate(filter.value.end_key).getTime() / 1000 + 24 * 60 * 60;
-            console.log('aiiiici');
           }
           params.filter[filter_name] = date_filter;
         } else {
