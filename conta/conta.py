@@ -13,6 +13,9 @@ from components.inventory.controller import InventoryHandler, InventoryReportHan
 from components.expenses.controller import ExpensesHandler, ExpensesUploadHandler, ExpensesSheetHandler
 from lib.controller import LoginHandler
 
+import asyncio
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 is_closing = False
 
 def signal_handler(signum, frame):

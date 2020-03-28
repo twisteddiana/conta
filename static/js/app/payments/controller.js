@@ -55,7 +55,7 @@ angular
     $controller('dashboardCtrl', { $scope: $scope });
     const currencyPromise = $scope.loadCurrencies().then(() => $scope.item.currency = $scope.main_currency);
 
-    $scope.$watchGroup(['item.amount', 'item.deductible', 'item.vat', 'exchange_rate', 'item.currency'], () => currencyPromise.then(() => calculate()));
+    $scope.$watchCollection('item', () => currencyPromise.then(() => calculate()));
 
     const calculate = () => {
       $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
@@ -110,7 +110,7 @@ angular
         $scope.updateExchangeRate();
       });
 
-    $scope.$watchGroup(['item.amount', 'item.deductible', 'item.vat', 'exchange_rate', 'item.currency'], () => currencyPromise.then(() => calculate()));
+    $scope.$watchCollection('item', () => currencyPromise.then(() => calculate()));
 
     const calculate = () => {
       $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;

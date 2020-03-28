@@ -47,7 +47,7 @@ angular
     $controller('entityAddCtrl', { $scope: $scope });
     const currencyPromise = $scope.loadCurrencies().then(() => $scope.item.currency = $scope.main_currency);
 
-    $scope.$watch('item', () => currencyPromise.then(() => calculate()));
+    $scope.$watchCollection('item', () => currencyPromise.then(() => calculate()));
 
     const calculate = () => {
       $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
@@ -99,7 +99,7 @@ angular
         $scope.updateExchangeRate();
       });
 
-    $scope.$watch('item', () => currencyPromise.then(() => calculate()));
+    $scope.$watchCollection('item', () => currencyPromise.then(() => calculate()));
 
     const calculate = () => {
       $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
