@@ -154,8 +154,8 @@ class EntityReport(CouchClass):
         rows = result['rows']
 
         csv = ''
-        headers = ['Data', 'Tip', 'Descriere', 'Tip tranzactie', 'Valuta', 'Valoare', 'Curs', 'Valoare RON',
-                   'Deductibil %', 'Deductibil RON']
+        headers = ['Data', 'Tip', 'Descriere', 'Tip tranzactie', 'Valuta', 'Valoare', 'TVA', 'Curs', 'Valoare RON',
+                   'TVA RON', 'Deductibil %', 'Deductibil RON']
         csv += ','.join(headers) + '\n'
 
         for doc in rows:
@@ -163,6 +163,9 @@ class EntityReport(CouchClass):
             rate = '1' if doc['currency'] == 'RON' else \
                 (yield exchange_rate.get(doc['currency'], doc['date_clear'], False))['exchange_rate']
             deductible = doc['deductible'] if doc['type'] == 'payment' else ''
+            if 'vat' not in doc:
+                doc['vat'] = ''
+                doc['real_vat'] = ''
             dict = {
                 'Data': doc['date_clear'],
                 'Tip': 'Plata' if doc['type'] == 'payment' else 'Incasare',
@@ -170,8 +173,10 @@ class EntityReport(CouchClass):
                 'Tip tranzactie': 'Banca' if doc['payment_type'] == 'Bank' else 'Numerar',
                 'Valuta': doc['currency'],
                 'Valoare': doc['amount'],
+                'TVA': doc['vat'],
                 'Curs': rate,
                 'Valoare RON': doc['real_amount'],
+                'TVA RON': doc['real_vat'],
                 'Deductibil %': deductible,
                 'Deductibil RON': round(doc['deductible_amount'], 2) if deductible != '' else ''
             }
