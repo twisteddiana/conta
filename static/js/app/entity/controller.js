@@ -175,10 +175,8 @@ angular
 
 angular
   .module('Conta')
-  .controller("entityAddCtrl", function ($scope, $http, Entity, Currency, Organisation, ExchangeRates, $controller) {
+  .controller("entityAddCtrl", function ($scope, $http, Entity, Currency, Organisation, ExchangeRates, $controller, IncomeCalculationService) {
     $controller('bootstrapCtrl', { $scope: $scope });
-    $scope.$watch('item.date', $scope.updateExchangeRate);
-    $scope.$watch('item.currency', $scope.updateExchangeRate);
 
     $scope.updateExchangeRate = () =>  {
       if ($scope.item.date && !utils.isValidDate($scope.item.date)) {
@@ -186,11 +184,12 @@ angular
       }
 
       if ($scope.item.currency != $scope.main_currency && $scope.item.date) {
-        ExchangeRates
+        return ExchangeRates
           .get($scope.item.currency, $scope.item.date)
           .then((data) =>  $scope.exchange_rate = data.exchange_rate);
       } else {
         $scope.exchange_rate = 1;
+        return Promise.resolve();
       }
     };
 

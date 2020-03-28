@@ -40,38 +40,35 @@ angular
 
 angular
   .module('Conta')
-  .controller("paymentsAddCtrl", function ($scope, $http, Entity, Currency, Organisation, ExchangeRates, $state, $controller, EntityAttachmentUpload) {
+  .controller("paymentsAddCtrl", function ($scope, $http, Entity, Currency, Organisation, ExchangeRates, $state, $controller, EntityAttachmentUpload, PaymentCalculationService) {
     $scope.title = 'Add payment entity';
     $scope.subtitle = 'Income';
-    $scope.item = {
-      type: 'payment',
-      deductible: 100,
-      vat: 0,
-    };
+    $scope.item = {};
 
     $scope.currencies = [];
 
     $controller('entityAddCtrl', { $scope: $scope });
     $controller('dashboardCtrl', { $scope: $scope });
-    const currencyPromise = $scope.loadCurrencies().then(() => $scope.item.currency = $scope.main_currency);
+    const currencyPromise = $scope.loadCurrencies().then(() => {
+      $scope.item = PaymentCalculationService.init($scope.main_currency);
+    });
 
-    $scope.$watchCollection('item', () => currencyPromise.then(() => calculate()));
-
-    const calculate = () => {
-      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
-      $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
-      $scope.item.real_vat = $scope.item.vat * $scope.exchange_rate;
+    const calculate = (newItem, oldItem = {}) => {
+      return currencyPromise.then(() => {
+        if (PaymentCalculationService.shouldUpdateExchangeRate(newItem, oldItem)) {
+          return $scope.updateExchangeRate().then(() => PaymentCalculationService.calculate($scope.item, $scope.exchange_rate));
+        }
+      })
     };
+    $scope.$watchCollection('item', calculate);
 
     $scope.submit = (isValid) => {
       if (!isValid) {
         return;
       }
 
-      currencyPromise.then(() => {
-        calculate();
-
-        Entity
+      return calculate().then(() => {
+        return Entity
           .create($scope.item)
           .then(result => {
             $scope.item._id = result.id;
@@ -92,7 +89,7 @@ angular
 
 angular
   .module('Conta')
-  .controller("paymentsEditCtrl", function($scope, $http, Entity, Organisation, Currency, ExchangeRates, $state, $stateParams, $controller, EntityAttachmentUpload){
+  .controller("paymentsEditCtrl", function($scope, $http, Entity, Organisation, Currency, ExchangeRates, $state, $stateParams, $controller, EntityAttachmentUpload, PaymentCalculationService){
     $scope.title = 'Edit payment entity';
     $scope.subtitle = 'Payment';
     $scope.item_id = $stateParams.entityID;
@@ -107,45 +104,46 @@ angular
       .then((data) => {
         $scope.item = data;
         $scope.item.date = $scope.item.date_clear;
-        $scope.updateExchangeRate();
+        return $scope.updateExchangeRate();
       });
 
-    $scope.$watchCollection('item', () => currencyPromise.then(() => calculate()));
-
-    const calculate = () => {
-      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
-      $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
-      $scope.item.type = 'payment';
-      $scope.item.real_vat = $scope.item.vat * $scope.exchange_rate;
+    const calculate = (newItem, oldItem = {}) => {
+      return currencyPromise.then(() => {
+        if (PaymentCalculationService.shouldUpdateExchangeRate(newItem, oldItem)) {
+          return $scope.updateExchangeRate().then(() => PaymentCalculationService.calculate($scope.item, $scope.exchange_rate));
+        }
+      })
     };
+    $scope.$watchCollection('item', calculate);
 
     $scope.submit = (isValid) => {
       if (!isValid) {
         return;
       }
-      calculate();
 
-      Entity
-        .create($scope.item)
-        .then(result => {
-          $scope.item._rev = result.rev;
-          if ($scope.attachments) {
-            EntityAttachmentUpload
-              .upload($scope.attachments, $scope.item)
-              .then(() => $state.go('app.payments'));
-          } else {
-            $state.go('app.payments');
-          }
-        })
-        .catch(errors => $scope.errors = errors);
+      return calculate().then(() => {
+        Entity
+          .create($scope.item)
+          .then(result => {
+            $scope.item._rev = result.rev;
+            if ($scope.attachments) {
+              EntityAttachmentUpload
+                .upload($scope.attachments, $scope.item)
+                .then(() => $state.go('app.payments'));
+            } else {
+              $state.go('app.payments');
+            }
+          })
+          .catch(errors => $scope.errors = errors);
+      });
     }
   });
 
 
 angular
   .module('Conta')
-  .controller("paymentsCloneCtrl", function($scope, $http, Entity, Organisation, Currency, ExchangeRates, $state, $stateParams, $controller, EntityAttachmentUpload){
-    $scope.title = 'Edit payment entity';
+  .controller("paymentsCloneCtrl", function($scope, $http, Entity, Organisation, Currency, ExchangeRates, $state, $stateParams, $controller, EntityAttachmentUpload, PaymentCalculationService){
+    $scope.title = 'Clone payment entity';
     $scope.subtitle = 'Payment';
     $scope.item_id = $stateParams.entityID;
     $scope.item = {};
@@ -162,7 +160,7 @@ angular
         delete $scope.item._rev;
         delete $scope.item._attachments;
         $scope.item.date = $scope.item.date_clear;
-        $scope.updateExchangeRate();
+        return $scope.updateExchangeRate();
       });
 
     $scope.submit = (isValid) => {
@@ -170,13 +168,8 @@ angular
         return;
       }
 
-      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
-      $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
-      $scope.item.type = 'payment';
-      $scope.item.vat = $scope.item.amount * $scope.item.vat_percent / 100;
-      $scope.item.real_vat = $scope.item.vat * $scope.exchange_rate;
-
-      Entity.create($scope.item)
+      PaymentCalculationService.calculate($scope.item, $scope.exchange_rate);
+      return Entity.create($scope.item)
         .then(result => {
           $scope.item._id = result.id;
           $scope.item._rev = result.rev;

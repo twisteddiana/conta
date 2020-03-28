@@ -1,6 +1,8 @@
 /**
  * Created by Diana on 11/15/2016.
  */
+const utils = require('../utils');
+
 angular
   .module('Conta')
   .factory('Entity', $http => ({
@@ -18,6 +20,33 @@ angular
     statement: data => $http.post('/statement', data).then(data => data.data),
     export: data => $http.post('/export', data).then(data => data.data),
   }));
+
+angular
+  .module('Conta')
+  .service('EntityCalculationService', function() {
+    const shouldUpdateExchangeRate = (newItem = {}, oldItem = {}) => {
+      return newItem.date !== oldItem.date || newItem.currency !== oldItem.currency;
+    };
+
+    const calculate = (item, exchangeRate) => {
+      item.real_amount = item.amount * exchangeRate;
+      item.real_vat = item.vat * exchangeRate;
+      item.deductible_amount = item.real_amount * item.deductible / 100;
+    };
+
+    const normalizeDate = (item) => {
+      if (item.date && !utils.isValidDate(item.date)) {
+        item.date = '';
+      }
+    };
+
+    return {
+      shouldUpdateExchangeRate,
+      calculate,
+      normalizeDate,
+    };
+  });
+
 
 angular
   .module('Conta')

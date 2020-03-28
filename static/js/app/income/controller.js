@@ -33,35 +33,32 @@ angular
 
 angular
   .module('Conta')
-  .controller("incomeAddCtrl", function ($scope, $http, Entity, Currency, Organisation, ExchangeRates, $state, $controller, EntityAttachmentUpload) {
+  .controller("incomeAddCtrl", function ($scope, $http, Entity, Currency, Organisation, ExchangeRates, $state, $controller, EntityAttachmentUpload, IncomeCalculationService) {
     $scope.title = 'Add income entity';
+    $scope.item = {};
     $scope.subtitle = 'Income';
-    $scope.item = {
-      vat: 0,
-      type: 'income',
-      classification: 'Incasare',
-      deductible: 100,
-    };
     $scope.currencies = [];
 
     $controller('entityAddCtrl', { $scope: $scope });
-    const currencyPromise = $scope.loadCurrencies().then(() => $scope.item.currency = $scope.main_currency);
+    const currencyPromise = $scope.loadCurrencies().then(() => {
+        $scope.item = IncomeCalculationService.init($scope.main_currency);
+    });
 
-    $scope.$watchCollection('item', () => currencyPromise.then(() => calculate()));
-
-    const calculate = () => {
-      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
+    const calculate = (newItem, oldItem = {}) => {
+      return currencyPromise.then(() => {
+        if (IncomeCalculationService.shouldUpdateExchangeRate(newItem, oldItem)) {
+          return $scope.updateExchangeRate().then(() => IncomeCalculationService.calculate($scope.item, $scope.exchange_rate));
+        }
+      })
     };
+    $scope.$watchCollection('item', calculate);
 
     $scope.submit = isValid => {
       if (!isValid) {
         return;
       }
-
-      currencyPromise.then(() => {
-        calculate();
-
-        Entity
+      return calculate().then(() => {
+        return Entity
           .create($scope.item)
           .then(result => {
             $scope.item._id = result.id;
@@ -82,7 +79,7 @@ angular
 
 angular
   .module('Conta')
-  .controller("incomeEditCtrl", function ($scope, $http, Entity, Organisation, Currency, ExchangeRates, $state, $stateParams, $controller, EntityAttachmentUpload) {
+  .controller("incomeEditCtrl", function ($scope, $http, Entity, Organisation, Currency, ExchangeRates, $state, $stateParams, $controller, EntityAttachmentUpload, IncomeCalculationService) {
     $scope.title = 'Edit income entity';
     $scope.subtitle = 'Income';
     $scope.entityID = $stateParams.entityID;
@@ -96,26 +93,24 @@ angular
       .then(item => {
         $scope.item = item;
         $scope.item.date = $scope.item.date_clear;
-        $scope.updateExchangeRate();
+        return $scope.updateExchangeRate();
       });
 
-    $scope.$watchCollection('item', () => currencyPromise.then(() => calculate()));
-
-    const calculate = () => {
-      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
+    const calculate = (newItem, oldItem = {}) => {
+      return currencyPromise.then(() => {
+        if (IncomeCalculationService.shouldUpdateExchangeRate(newItem, oldItem)) {
+          return $scope.updateExchangeRate().then(() => IncomeCalculationService.calculate($scope.item, $scope.exchange_rate));
+        }
+      })
     };
+    $scope.$watchCollection('item', calculate);
 
     $scope.submit = function(isValid) {
       if (!isValid) {
         return;
       }
-
-      currencyPromise().then(() => {
-        calculate();
-        $scope.item.type = 'income';
-        $scope.item.classification = 'Incasare';
-        $scope.item.deductible = 100;
-        Entity
+      return calculate().then(() => {
+        return Entity
           .create($scope.item)
           .then(result => {
             $scope.item._rev = result.rev;
