@@ -28,6 +28,7 @@ class Entity(CouchClass):
 
 		dict['date'] = timestamp(get_date(dict['date'], '%d-%m-%Y'))
 		dict['real_amount'] = round(dict['real_amount'], 2)
+		dict['real_vat'] = round(dict['real_vat'], 2)
 		doc = yield self.db.save_doc(dict)
 		return doc
 

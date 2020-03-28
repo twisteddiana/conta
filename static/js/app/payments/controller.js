@@ -47,6 +47,9 @@ angular
 
     $scope.currencies = [];
     $scope.item.deductible = 100;
+    $scope.item.vat_percent = 0;
+    $scope.item.vat = 0;
+    $scope.item.real_vat = 0;
 
     $controller('entityAddCtrl', { $scope: $scope });
     $controller('dashboardCtrl', { $scope: $scope });
@@ -61,6 +64,8 @@ angular
         $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
         $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
         $scope.item.type = 'payment';
+        $scope.item.vat = $scope.item.amount * $scope.item.vat_percent;
+        $scope.item.real_vat = $scope.item.vat * $scope.exchange_rate;
 
         Entity
           .create($scope.item)
@@ -90,7 +95,7 @@ angular
     $scope.item = {};
     $controller('entityAddCtrl', { $scope: $scope });
     $controller('dashboardCtrl', { $scope: $scope });
-    
+
     const currencyPromise = $scope.loadCurrencies();
 
     currencyPromise
@@ -109,6 +114,9 @@ angular
       $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
       $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
       $scope.item.type = 'payment';
+      $scope.item.vat = $scope.item.amount * $scope.item.vat_percent / 100;
+      $scope.item.real_vat = $scope.item.vat * $scope.exchange_rate;
+
       Entity
         .create($scope.item)
         .then(result => {
@@ -157,6 +165,8 @@ angular
       $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
       $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
       $scope.item.type = 'payment';
+      $scope.item.vat = $scope.item.amount * $scope.item.vat_percent / 100;
+      $scope.item.real_vat = $scope.item.vat * $scope.exchange_rate;
 
       Entity.create($scope.item)
         .then(result => {

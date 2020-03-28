@@ -52,6 +52,8 @@ angular
         $scope.item.type = 'income';
         $scope.item.classification = 'Incasare';
         $scope.item.deductible = 100;
+        $scope.item.vat_percent = 0;
+        $scope.item.vat_value = 0;
 
         Entity
           .create($scope.item)
