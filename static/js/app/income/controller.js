@@ -36,11 +36,22 @@ angular
   .controller("incomeAddCtrl", function ($scope, $http, Entity, Currency, Organisation, ExchangeRates, $state, $controller, EntityAttachmentUpload) {
     $scope.title = 'Add income entity';
     $scope.subtitle = 'Income';
-    $scope.item = {};
+    $scope.item = {
+      vat: 0,
+      type: 'income',
+      classification: 'Incasare',
+      deductible: 100,
+    };
     $scope.currencies = [];
 
     $controller('entityAddCtrl', { $scope: $scope });
     const currencyPromise = $scope.loadCurrencies().then(() => $scope.item.currency = $scope.main_currency);
+
+    $scope.$watch('item', () => currencyPromise.then(() => calculate()));
+
+    const calculate = () => {
+      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
+    };
 
     $scope.submit = isValid => {
       if (!isValid) {
@@ -48,12 +59,7 @@ angular
       }
 
       currencyPromise.then(() => {
-        $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
-        $scope.item.type = 'income';
-        $scope.item.classification = 'Incasare';
-        $scope.item.deductible = 100;
-        $scope.item.vat_percent = 0;
-        $scope.item.vat_value = 0;
+        calculate();
 
         Entity
           .create($scope.item)
@@ -80,11 +86,11 @@ angular
     $scope.title = 'Edit income entity';
     $scope.subtitle = 'Income';
     $scope.entityID = $stateParams.entityID;
-    $scope.item = {}
+    $scope.item = {};
     $scope.attachments = [];
 
     $controller('entityAddCtrl', { $scope: $scope });
-    $scope
+    const currencyPromise = $scope
       .loadCurrencies()
       .then(() => Entity.get($scope.entityID))
       .then(item => {
@@ -93,28 +99,36 @@ angular
         $scope.updateExchangeRate();
       });
 
+    $scope.$watch('item', () => currencyPromise.then(() => calculate()));
+
+    const calculate = () => {
+      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
+    };
+
     $scope.submit = function(isValid) {
       if (!isValid) {
         return;
       }
 
-      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
-      $scope.item.type = 'income';
-      $scope.item.classification = 'Incasare';
-      $scope.item.deductible = 100;
-      Entity
-        .create($scope.item)
-        .then(result => {
-          $scope.item._rev = result.rev;
-          if ($scope.attachments.length) {
-            EntityAttachmentUpload
-              .upload($scope.attachments, $scope.item)
-              .then(() => $state.go('app.income'));
-          } else {
-            $state.go('app.income');
-          }
-        })
-        .catch(errors => $scope.errors = errors);
+      currencyPromise().then(() => {
+        calculate();
+        $scope.item.type = 'income';
+        $scope.item.classification = 'Incasare';
+        $scope.item.deductible = 100;
+        Entity
+          .create($scope.item)
+          .then(result => {
+            $scope.item._rev = result.rev;
+            if ($scope.attachments.length) {
+              EntityAttachmentUpload
+                .upload($scope.attachments, $scope.item)
+                .then(() => $state.go('app.income'));
+            } else {
+              $state.go('app.income');
+            }
+          })
+          .catch(errors => $scope.errors = errors);
+      });
     }
   });
 

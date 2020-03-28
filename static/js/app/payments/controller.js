@@ -43,17 +43,25 @@ angular
   .controller("paymentsAddCtrl", function ($scope, $http, Entity, Currency, Organisation, ExchangeRates, $state, $controller, EntityAttachmentUpload) {
     $scope.title = 'Add payment entity';
     $scope.subtitle = 'Income';
-    $scope.item = {};
+    $scope.item = {
+      type: 'payment',
+      deductible: 100,
+      vat: 0,
+    };
 
     $scope.currencies = [];
-    $scope.item.deductible = 100;
-    $scope.item.vat_percent = 0;
-    $scope.item.vat = 0;
-    $scope.item.real_vat = 0;
 
     $controller('entityAddCtrl', { $scope: $scope });
     $controller('dashboardCtrl', { $scope: $scope });
     const currencyPromise = $scope.loadCurrencies().then(() => $scope.item.currency = $scope.main_currency);
+
+    $scope.$watch('item', () => currencyPromise.then(() => calculate()));
+
+    const calculate = () => {
+      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
+      $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
+      $scope.item.real_vat = $scope.item.vat * $scope.exchange_rate;
+    };
 
     $scope.submit = (isValid) => {
       if (!isValid) {
@@ -61,11 +69,7 @@ angular
       }
 
       currencyPromise.then(() => {
-        $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
-        $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
-        $scope.item.type = 'payment';
-        $scope.item.vat = $scope.item.amount * $scope.item.vat_percent;
-        $scope.item.real_vat = $scope.item.vat * $scope.exchange_rate;
+        calculate();
 
         Entity
           .create($scope.item)
@@ -106,16 +110,20 @@ angular
         $scope.updateExchangeRate();
       });
 
+    $scope.$watch('item', () => currencyPromise.then(() => calculate()));
+
+    const calculate = () => {
+      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
+      $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
+      $scope.item.type = 'payment';
+      $scope.item.real_vat = $scope.item.vat * $scope.exchange_rate;
+    };
+
     $scope.submit = (isValid) => {
       if (!isValid) {
         return;
       }
-
-      $scope.item.real_amount = $scope.item.amount * $scope.exchange_rate;
-      $scope.item.deductible_amount = $scope.item.real_amount * $scope.item.deductible / 100;
-      $scope.item.type = 'payment';
-      $scope.item.vat = $scope.item.amount * $scope.item.vat_percent / 100;
-      $scope.item.real_vat = $scope.item.vat * $scope.exchange_rate;
+      calculate();
 
       Entity
         .create($scope.item)

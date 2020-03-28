@@ -101,9 +101,9 @@
                             <div class="col-lg-8">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
-                                        <div class="input-group-text">%</div>
+                                        <div class="input-group-text">{{item.currency}}</div>
                                     </div>
-                                    <input type="number" data-ng-model="item.vat_percent" required ng-required="{float}" name="vat_percent" class="form-control">
+                                    <input type="number" data-ng-model="item.vat" required ng-required="{float}" name="vat" class="form-control">
                                 </div>
                             </div>
                         </div>
@@ -150,9 +150,9 @@
                                 <td>Valoare</td>
                                 <td>{{item.amount * exchange_rate | number:2}} {{main_currency}}</td>
                             </tr>
-                            <tr ng-if="item.vat_percent && exchange_rate">
+                            <tr ng-if="item.vat && exchange_rate">
                                 <td>TVA</td>
-                                <td>{{item.vat_percent / 100 * item.amount * exchange_rate | number:2}} {{main_currency}}</td>
+                                <td>{{item.vat * exchange_rate | number:2}} {{main_currency}}</td>
                             </tr>
                         </table>
                     </div>
