@@ -44,7 +44,7 @@ angular
           .then(data => data.data),
       delete: (name, expense) =>
         $http
-          .delete(`/expense/attachment?name=${encodeURIComponent(name)}&doc_id=${expense._id}&rev=${expense.rev}`)
+          .delete(`/expense/attachment?name=${encodeURIComponent(name)}&doc_id=${expense._id}&rev=${expense._rev}`)
           .then(data => data.data)
     }
   });
