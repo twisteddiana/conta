@@ -42,9 +42,12 @@ angular
         $http
           .post(`/expense/attachment/${encodeURIComponent(name)}`, expense, {responseType: 'arraybuffer'})
           .then(data => data.data),
-      delete: (name, expense) =>
-        $http
+      delete: (name, expense) => {
+        console.log(expense);
+        return $http
           .delete(`/expense/attachment?name=${encodeURIComponent(name)}&doc_id=${expense._id}&rev=${expense._rev}`)
-          .then(data => data.data)
+          .then(data => data.data);
+      }
+
     }
   });
