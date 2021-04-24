@@ -35,6 +35,7 @@ class Expenses(CouchClass):
 		if entity_doc is None:
 			entity_doc = {
 				'real_amount': doc['deductible_amount'],
+				'real_vat': 0,
 				'document_number': doc['document_number'],
 				'deductible_amount': doc['deductible_amount'],
 				'currency': doc['currency'],
