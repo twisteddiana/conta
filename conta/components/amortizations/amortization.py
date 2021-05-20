@@ -85,7 +85,7 @@ class Amortization(CouchClass):
 
 	def get_installment_amount(self, doc):
 		amount = round(float(doc['amount']) / int(doc['duration']), 2)
-		return math.min(amount, self.max_installment)
+		return min(amount, self.max_installment)
 
 	@gen.coroutine
 	def create_installment(self, doc, installment_date, installment_number):
