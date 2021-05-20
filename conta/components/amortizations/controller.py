@@ -4,7 +4,7 @@ from lib.controller import ContaController
 import tornado.web
 from tornado import gen
 import pdfkit
-from lib import settings
+from lib.settings import settings
 
 
 class AmortizationsHandler(ContaController):
