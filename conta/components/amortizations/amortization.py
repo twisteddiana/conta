@@ -6,6 +6,7 @@ from lib.moment import *
 from components.entity.entity import Entity
 from components.inventory.inventory import Inventory
 import math
+import calendar
 
 
 def add_months(sourcedate, months):
@@ -14,7 +15,7 @@ def add_months(sourcedate, months):
 	month = sourcedate.month - 1 + months
 	year = int(sourcedate.year + month / 12 )
 	month = month % 12 + 1
-	day = min(sourcedate.day,calendar.monthrange(year,month)[1])
+	day = min(sourcedate.day, calendar.monthrange(year,month)[1])
 	return date(year, month, day)
 
 
@@ -26,6 +27,8 @@ def get_first_day(date_text):
 
 
 class Amortization(CouchClass):
+	max_installment = 1500
+
 	@gen.coroutine
 	def initialise(self):
 		yield super().initialise('amortizations')
@@ -79,6 +82,10 @@ class Amortization(CouchClass):
 			for installment in result['rows']:
 				self.db.delete_doc(installment['doc'])
 
+	def get_installment_amount(self, doc):
+		amount = round(float(doc['amount']) / int(doc['duration']), 2)
+		return math.min(amount, self.max_installment)
+
 	@gen.coroutine
 	def create_installment(self, doc, installment_date, installment_number):
 		installment = {
@@ -87,7 +94,7 @@ class Amortization(CouchClass):
 			'date_clear': installment_date.strftime('%d-%m-%Y'),
 			'object_id': doc['_id'],
 			'installment': installment_number + 1,
-			'amount': round(float(doc['amount']) / int(doc['duration']), 2),
+			'amount': self.get_installment_amount(doc),
 			'name': doc['name']
 		}
 
