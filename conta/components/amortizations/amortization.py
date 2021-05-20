@@ -152,6 +152,7 @@ class Amortization(CouchClass):
 					'description': 'Amortizari',
 					'organisation': '',
 					'real_amount': item['doc']['amount'],
+					'real_vat': 0,
 					'deductible': 100,
 					'deductible_amount': item['doc']['amount'],
 					'classification': 'Amortizari',
