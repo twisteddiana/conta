@@ -36,7 +36,8 @@ class Amortization(CouchClass):
 	@gen.coroutine
 	def get(self, id):
 		has_doc = yield self.db.has_doc(id)
-		if (has_doc):
+		print(has_doc)
+		if has_doc:
 			doc = yield self.db.get_doc(id)
 		else:
 			doc = None
