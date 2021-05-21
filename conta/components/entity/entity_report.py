@@ -253,6 +253,11 @@ class EntityReport(CouchClass):
             medical_insurance = round(base * 12 * 10 / 100, 2)
             pension = round(base * 12 * 25 / 100, 2)
             income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 10 / 100, 2)
+        elif query['year'] == '2020':
+            base = 2230
+            medical_insurance = round(base * 12 * 10 / 100, 2)
+            pension = round(base * 12 * 25 / 100, 2)
+            income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 10 / 100, 2)
 
         return {
             'brut_income': brut_income,
