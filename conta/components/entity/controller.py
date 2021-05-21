@@ -29,7 +29,7 @@ class EntitiesHandler(ContaController):
 		else:
 			docs = await entity.reduce(dict)
 			self.write(docs)
-		#entity.close()
+		entity.close()
 
 
 class EntityHandler(ContaController):
