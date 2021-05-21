@@ -8,8 +8,7 @@ import couch
 
 
 class EntitiesHandler(ContaController):
-	@gen.coroutine
-	def post(self):
+	async def post(self):
 		if self.request.body != b'':
 			dict = tornado.escape.json_decode(self.request.body)
 		else:
@@ -20,15 +19,15 @@ class EntitiesHandler(ContaController):
 		if not dict['reduce']:
 			if not 'filter' in dict.keys() or not dict['filter']:
 				try:
-					docs = yield entity.collection(dict)
+					docs = await entity.collection(dict)
 					self.write(docs)
 				except couch.couch.CouchException as err:
 					print(err)
 			else:
-				docs = yield entity.filter(dict)
+				docs = await entity.filter(dict)
 				self.write(docs)
 		else:
-			docs = yield entity.reduce(dict)
+			docs = await entity.reduce(dict)
 			self.write(docs)
 		entity.close()
 

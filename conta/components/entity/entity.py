@@ -53,8 +53,7 @@ class Entity(CouchClass):
 		result = yield self.db.view(dict['design'], dict['sort'], **dict)
 		return result
 
-	@gen.coroutine
-	def filter(self, dictionary):
+	async def filter(self, dictionary):
 		filtered = None
 		for key, value in dictionary['filter'].items():
 			if value:
@@ -68,7 +67,7 @@ class Entity(CouchClass):
 					filter_dict['inclusive_end'] = True
 					filter_dict['reduce'] = False
 
-					result = yield self.db.view(dictionary['design'], key, **filter_dict)
+					result = await self.db.view(dictionary['design'], key, **filter_dict)
 				else:
 					filter_dict = {}
 					filter_dict['reduce'] = False
@@ -76,7 +75,7 @@ class Entity(CouchClass):
 					for val in value:
 						filter_dict['start_key'] = [str(val)]
 						filter_dict['end_key'] = [str(val), {}]
-						intermediary = yield self.db.view(dictionary['design'], key, **filter_dict)
+						intermediary = await self.db.view(dictionary['design'], key, **filter_dict)
 						result['rows'] = result['rows'] + intermediary['rows']
 
 				list = [[item['value'][dictionary['sort']][0], item['id']] for item in result['rows']]
@@ -93,10 +92,10 @@ class Entity(CouchClass):
 			else:
 				dictionary['keys'] = sorted(filtered, key=lambda x: x[0])
 
-			result = yield self.db.view(dictionary['design'], dictionary['sort'], include_docs = True, **dictionary)
+			result = await self.db.view(dictionary['design'], dictionary['sort'], include_docs = True, **dictionary)
 			return result
 		elif filtered is None:
-			result = yield self.db.view(dictionary['design'], dictionary['sort'], include_docs=True, **dictionary)
+			result = await self.db.view(dictionary['design'], dictionary['sort'], include_docs=True, **dictionary)
 			return result
 		else:
 			return {'rows': []}
