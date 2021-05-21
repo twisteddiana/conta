@@ -6,6 +6,12 @@ import pdfkit
 from lib.settings import settings
 from lib.controller import ContaController
 
+amortization = Amortization()
+amortization.initialise()
+entity = EntityReport()
+entity.initialise()
+
+
 
 class ReportHandler(ContaController):
 	@gen.coroutine
@@ -33,50 +39,30 @@ class ReportHandler(ContaController):
 
 	@gen.coroutine
 	def report_amortization(self, query):
-		amortization = Amortization()
-		amortization.initialise()
-
 		result = yield amortization.report(query)
 		html = self.render_string("reports/" + query['report'] + '.html', classification=query['classification'],
 								report=result['report'], transactions=result['transactions'])
-
-		amortization.close()
 		return html
 
 	@gen.coroutine
 	def general_report(self, query):
-		entity = EntityReport()
-		entity.initialise()
-
 		result = yield entity.report(query)
-
 		html = self.render_string("reports/" + query['report'] + '.html', classification=query['classification'],
 								report=result['report'], transactions=result['transactions'])
-		entity.close()
 		return html
 
 	@gen.coroutine
 	def registry_report(self, query):
-		entity = EntityReport()
-		entity.initialise()
-
 		result = yield entity.report(query)
-
 		html = self.render_string("reports/" + query['report'] + '.html',
 								report=result['report'], transactions=result['transactions'])
-		entity.close()
 		return html
 
 	@gen.coroutine
 	def fiscal_evidence_report(self, query):
-		entity = EntityReport()
-		entity.initialise()
-
 		result = yield entity.fiscal_evidence_report(query)
-
 		html = self.render_string("reports/" + query['report'] + '.html',
 								year=result['year'], classifications=result['classifications'])
-		entity.close()
 		return html
 
 class StatementHandler(ContaController):
@@ -87,12 +73,8 @@ class StatementHandler(ContaController):
 		else:
 			query = {}
 
-		entity = EntityReport()
-		entity.initialise()
-
 		result = yield entity.statement(query)
 		self.write(result)
-		entity.close()
 
 
 class ExportHandler(ContaController):
@@ -103,9 +85,5 @@ class ExportHandler(ContaController):
 		else:
 			query = {}
 
-		entity = EntityReport()
-		entity.initialise()
-
 		result = yield entity.export(query)
 		self.write(result)
-		entity.close()
