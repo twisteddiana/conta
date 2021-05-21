@@ -21,6 +21,7 @@ class MyAsyncCouch(couch.AsyncCouch):
         couch_url = os.environ.get('COUCH_URL') or 'http://127.0.0.1:5984/'
         request_args['auth_username'] = os.environ.get('COUCH_USER') or None
         request_args['auth_password'] = os.environ.get('COUCH_PWD') or None
+        request_args['use_gzip'] = False
 
         super(MyAsyncCouch, self).__init__(db_name, couch_url, None, **request_args)
 
