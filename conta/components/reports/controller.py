@@ -11,8 +11,6 @@ amortization.initialise()
 entity = EntityReport()
 entity.initialise()
 
-
-
 class ReportHandler(ContaController):
 	@gen.coroutine
 	def post(self):

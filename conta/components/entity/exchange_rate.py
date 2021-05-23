@@ -5,6 +5,8 @@ import xml.etree.ElementTree as ET
 from components.entity.currency import Currency
 from lib.moment import *
 
+currency = Currency()
+currency.initialise()
 
 class ExchangeRate(CouchClass):
     @gen.coroutine
@@ -13,16 +15,12 @@ class ExchangeRate(CouchClass):
 
     @gen.coroutine
     def update(self):
-        currency = Currency()
-        currency.initialise()
-
         currencies = (yield currency.collection())['rows']
         today = date.today()
         for item in currencies:
             if item['doc']['iso'] != 'RON':
                 yield self.import_rates(today.year, item['doc']['iso'])
                 yield self.import_rates(today.year - 1, item['doc']['iso'])
-        currency.close()
 
     @gen.coroutine
     def post(self, dict):
@@ -46,16 +44,14 @@ class ExchangeRate(CouchClass):
             print('requested date not found ' + iso + ':' + request_timestamp + ' ' + str(request_date))
 
             if import_rates:
-                current = yield self.import_rates(year, iso)
-                prev = yield self.import_rates(year - 1, iso)
+                yield self.import_rates(year, iso)
+                yield self.import_rates(year - 1, iso)
 
             try:
                 doc = yield self.db.get_doc(iso + ':' + request_timestamp)
             except:
                 result = yield self.db.view('filter', 'by_date_and_iso', start_key=iso + request_timestamp, descending=True, limit=1, inclusive_end=True)
-                doc = {
-                    'exchange_rate': result['rows'][0]['value']
-                }
+                doc = {'exchange_rate': result['rows'][0]['value']}
 
         return doc
 
@@ -78,7 +74,6 @@ class ExchangeRate(CouchClass):
                     dict['exchange_rate'] = rate.text
 
             try:
-                doc = yield self.db.get_doc(dict['_id'])
+                yield self.db.get_doc(dict['_id'])
             except:
-                doc = yield self.db.save_doc(dict)
-        return doc
+                yield self.db.save_doc(dict)

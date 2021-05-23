@@ -97,6 +97,9 @@ angular
 
     const downloadExport = (data, report) => {
       let name = report.name + ' ';
+      if (data.classification) {
+        name += `${data.classification} `;
+      }
       if (typeof report.month != 'undefined' && report.month > 0)
         name += report.month + '.';
       name += report.year;

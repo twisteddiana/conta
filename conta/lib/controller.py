@@ -4,8 +4,7 @@ from lib.settings import settings
 
 
 class ContaController(tornado.web.RequestHandler):
-    @gen.coroutine
-    def prepare(self):
+    async def prepare(self):
         uri = settings['couch_url'] + '/_session'
         headers = {}
         if 'Cookie' in self.request.headers:
@@ -13,7 +12,7 @@ class ContaController(tornado.web.RequestHandler):
 
         req = httpclient.HTTPRequest(uri, method='GET', headers=headers)
         try:
-            resp = yield httpclient.AsyncHTTPClient().fetch(req)
+            await httpclient.AsyncHTTPClient().fetch(req)
         except httpclient.HTTPError as e:
             self.set_status(401)
             self.finish(e.response.body)

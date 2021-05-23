@@ -3,6 +3,8 @@ from tornado import gen
 from components.entity.entity import Entity
 from lib.moment import *
 
+entity = Entity()
+entity.initialise()
 
 class Expenses(CouchClass):
 	@gen.coroutine
@@ -24,9 +26,7 @@ class Expenses(CouchClass):
 		doc['deductible_amount'] = round(doc['deductible_amount'], 2)
 		doc['date'] = timestamp(get_date(doc['date']))
 
-		document = yield self.db.save_doc(doc)
-		entity = Entity()
-		entity.initialise()
+		expense_result = yield self.db.save_doc(doc)
 		if 'payment_id' in doc.keys():
 			entity_doc = yield entity.get(doc['payment_id'])
 		else:
@@ -48,10 +48,10 @@ class Expenses(CouchClass):
 				'payment_type': 'Cash',
 				'amount': doc['deductible_amount']
 			}
-			result = yield entity.post(entity_doc)
-			doc = yield self.get(document['id'])
-			doc['payment_id'] = result['id']
-			document = yield self.db.save_doc(doc)
+			entity_result = yield entity.post(entity_doc)
+			doc = yield self.get(expense_result['id'])
+			doc['payment_id'] = entity_result['id']
+			expense_result = yield self.db.save_doc(doc)
 		else:
 			entity_doc['real_amount'] = doc['deductible_amount']
 			entity_doc['document_number'] = doc['document_number']
@@ -62,7 +62,7 @@ class Expenses(CouchClass):
 			entity_doc['amount'] = doc['deductible_amount']
 			yield entity.post(entity_doc)
 
-		return document
+		return expense_result
 
 	@gen.coroutine
 	def delete(self, id):

@@ -37,10 +37,8 @@ class Entity(CouchClass):
 		has_doc = yield self.db.has_doc(id)
 		if (has_doc):
 			doc = yield self.db.get_doc(id)
-			doc = yield self.db.delete_doc(doc)
-		else:
-			doc = None
-		return doc
+			result = yield self.db.delete_doc(doc)
+			return result
 
 	@gen.coroutine
 	def collection(self, dict):
@@ -123,8 +121,6 @@ class Entity(CouchClass):
 	@gen.coroutine
 	def remove_amortization(self):
 		result = yield self.db.view('payments', 'classification', start_key=['Amortizari'], end_key=['Amortizari', {}], include_docs=True, reduce=False)
-		res = True
 		for item in result['rows']:
-			res = yield self.db.delete_doc(item['doc'])
-		return res
+			yield self.db.delete_doc(item['doc'])
 

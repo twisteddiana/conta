@@ -8,23 +8,10 @@ from components.inventory.inventory import Inventory
 import math
 import calendar
 
-
-def add_months(sourcedate, months):
-	if months == 0:
-		return sourcedate
-	month = sourcedate.month - 1 + months
-	year = int(sourcedate.year + month / 12 )
-	month = month % 12 + 1
-	day = min(sourcedate.day, calendar.monthrange(year,month)[1])
-	return date(year, month, day)
-
-
-def get_first_day(date_text):
-	date_obj = datetime.strptime(date_text, '%d-%m-%Y')
-	date_obj = add_months(date_obj, 2)
-	date_obj = date_obj - timedelta(days=date_obj.day)
-	return date_obj
-
+entity = Entity()
+entity.initialise()
+inventory = Inventory()
+inventory.initialise()
 
 class Amortization(CouchClass):
 	max_installment = 1500
@@ -57,23 +44,22 @@ class Amortization(CouchClass):
 		doc['last_date'] = int(time.mktime(last_date.timetuple()))
 		doc['last_date_clear'] = last_date.strftime('%d-%m-%Y')
 
-		document = yield self.db.save_doc(doc)
-		document = yield self.db.get_doc(document['id'])
+		result = yield self.db.save_doc(doc)
+		doc = yield self.db.get_doc(result['id'])
 		create_installments = True
-		if current_doc:
-			if current_doc['date'] == doc['date'] and current_doc['amount'] == doc['amount'] and current_doc['duration'] == doc['duration']:
-				# nothing changed
-				create_installments = False
+		if current_doc and current_doc['date'] == doc['date'] and current_doc['amount'] == doc['amount'] and current_doc['duration'] == doc['duration']:
+			# nothing changed
+			create_installments = False
 
 		if create_installments:
 			if current_doc:
 				yield self.remove_installments(current_doc['_id'])
 			for i in range(0, doc['duration']):
-				installment = yield self.create_installment(document, add_months(initial_date, i), i)
+				yield self.create_installment(doc, add_months(initial_date, i), i)
 
-			yield self.create_inventory_entry(document)
+			yield self.create_inventory_entry(doc)
 
-		return document
+		return doc
 
 	@gen.coroutine
 	def remove_installments(self, doc_id):
@@ -81,7 +67,7 @@ class Amortization(CouchClass):
 		if (has_doc):
 			result = yield self.db.view('installments', 'object', start_key=[doc_id], end_key=[doc_id, {}], reduce=False, include_docs=True)
 			for installment in result['rows']:
-				self.db.delete_doc(installment['doc'])
+				yield self.db.delete_doc(installment['doc'])
 
 	def get_installment_amount(self, doc):
 		amount = round(float(doc['amount']) / int(doc['duration']), 2)
@@ -99,8 +85,7 @@ class Amortization(CouchClass):
 			'name': doc['name']
 		}
 
-		installment = yield self.db.save_doc(installment)
-		return installment
+		yield self.db.save_doc(installment)
 
 	@gen.coroutine
 	def collection(self, dict):
@@ -112,23 +97,18 @@ class Amortization(CouchClass):
 		has_doc = yield self.db.has_doc(id)
 		if (has_doc):
 			doc = yield self.db.get_doc(id)
-			self.remove_installments(doc.id)
-			doc = yield self.db.delete_doc(doc)
-		else:
-			doc = None
-		return doc
+			yield self.remove_installments(id)
+			result = yield self.db.delete_doc(doc)
+			return result
 
 	@gen.coroutine
 	def liquidated(self, id):
-		end_date =  int(time.mktime(datetime.today().timetuple()))
+		end_date = int(time.mktime(datetime.today().timetuple()))
 		result = yield self.db.view('installments', 'object', start_key=[id], end_key=[id, end_date], reduce=True, group_level=1)
 		return result['rows'][0]['value']
 
 	@gen.coroutine
 	def synchronize(self):
-		entity = Entity()
-		entity.initialise()
-
 		result = yield self.db.view('installments', 'date', include_docs=True)
 		group = None
 		month = 0
@@ -165,14 +145,10 @@ class Amortization(CouchClass):
 		# save last group
 		if group is not None:
 			result = yield entity.post(group)
-		entity.close()
-
 		return result
 
 	@gen.coroutine
 	def report(self, query):
-		dictionary = {'design': 'installments'}
-
 		date_start = datetime.strptime(query['date_start'], '%d-%m-%Y')
 		# first day of the month
 		date_start = date_start - timedelta(days=date_start.day - 1)
@@ -186,21 +162,19 @@ class Amortization(CouchClass):
 		date_end = date_end + timedelta(days=days_in_month - date_end.day)
 		date_end_timestamp = int(time.mktime(date_end.timetuple()))
 
-		dictionary['view'] = 'date'
-		dictionary['start_key'] = [date_start_year_timestamp]
-		dictionary['end_key'] = [date_end_timestamp, {}]
-
-		dictionary['reduce'] = False
-		dictionary['include_docs'] = True
-		result = yield self.db.view(dictionary['design'], dictionary['view'], **dictionary)
-
-		rows = result['rows']
-
+		options = {
+			'design': 'installments',
+			'view': 'date',
+			'start_key':  [date_start_year_timestamp],
+			'end_key': [date_end_timestamp, {}],
+			'reduce': False,
+			'include_docs': True,
+		}
+		result = yield self.db.view(options['design'], options['view'], **options)
 		# group by months
-
 		report = 0
 		transactions = []
-		for item in rows:
+		for item in  result['rows']:
 			if item['doc']['date'] < date_start_timestamp:
 				report += round(item['doc']['amount'], 2)
 			else:
@@ -212,10 +186,9 @@ class Amortization(CouchClass):
 					'description':  'Amortizare '+ item['doc']['name'] + '(' + str(item['doc']['installment']) + ')',
 					'month': transaction_date.month,
 					'year': transaction_date.year,
+					'deductible': 100,
+					'amount': round(item['doc']['amount'], 2),
 				}
-
-				transaction['amount'] = round(item['doc']['amount'], 2)
-				transaction['deductible'] = 100
 				transactions.append(transaction)
 		return {
 			'report': report,
@@ -234,10 +207,6 @@ class Amortization(CouchClass):
 
 	@gen.coroutine
 	def create_inventory_entry(self, document):
-
-		inventory = Inventory()
-		inventory.initialise()
-
 		search = {
 			'design': 'default',
 			'sort': 'amortization_id',
@@ -281,7 +250,6 @@ class Amortization(CouchClass):
 			inventory_document['logs'].append(log)
 
 		result = yield inventory.post(inventory_document)
-		inventory.close()
 		return result
 
 

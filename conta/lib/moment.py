@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, date
 import calendar
 
-
 def get_date(date_string, format='%d-%m-%Y'):
     return datetime.strptime(date_string, format)
 
@@ -45,3 +44,19 @@ def last_working_day(date_obj):
     if weekday > max_weekday:
         return subtract(date_obj, days=weekday-max_weekday)
     return subtract(date_obj, days=1)
+
+def add_months(sourcedate, months):
+	if months == 0:
+		return sourcedate
+	month = sourcedate.month - 1 + months
+	year = int(sourcedate.year + month / 12 )
+	month = month % 12 + 1
+	day = min(sourcedate.day, calendar.monthrange(year,month)[1])
+	return date(year, month, day)
+
+
+def get_first_day(date_text):
+	date_obj = datetime.strptime(date_text, '%d-%m-%Y')
+	date_obj = add_months(date_obj, 2)
+	date_obj = date_obj - timedelta(days=date_obj.day)
+	return date_obj

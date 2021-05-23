@@ -3,6 +3,8 @@ from tornado import gen
 from components.entity.exchange_rate import ExchangeRate
 from lib.moment import *
 
+exchange_rate = ExchangeRate()
+exchange_rate.initialise()
 
 class EntityReport(CouchClass):
     @gen.coroutine
@@ -11,7 +13,11 @@ class EntityReport(CouchClass):
 
     @gen.coroutine
     def report(self, query):
-        dictionary = {'design': 'all'}
+        dictionary = {
+            'design': 'all',
+            'reduce': False,
+            'include_docs': True,
+        }
 
         date_start = start_of_month(get_date(query['date_start']))
         date_start_year = start_of_year(date_start)
@@ -28,18 +34,12 @@ class EntityReport(CouchClass):
             dictionary['start_key'] = [query['classification'], timestamp(date_start_year)]
             dictionary['end_key'] = [query['classification'], timestamp(date_end)]
 
-        dictionary['reduce'] = False
-        dictionary['include_docs'] = True
         result = yield self.db.view(dictionary['design'], dictionary['view'], **dictionary)
-
-        rows = result['rows']
-
         # group by months
-
         report = 0
         transactions = []
         deductible_only = query['report'] == 'journal'
-        for item in rows:
+        for item in result['rows']:
             item = item['doc']
             if item['date'] < date_start_timestamp:
                 if deductible_only:
@@ -134,8 +134,6 @@ class EntityReport(CouchClass):
 
     @gen.coroutine
     def export(self, query):
-        exchange_rate = ExchangeRate()
-        exchange_rate.initialise()
         exchange_rate.update()
 
         date_start = start_of_month(get_date(query['date_start']))
@@ -185,7 +183,6 @@ class EntityReport(CouchClass):
                 row.append(str(dict[header]))
             csv += ','.join(row) + '\n'
 
-        exchange_rate.close()
         return csv
 
     @gen.coroutine

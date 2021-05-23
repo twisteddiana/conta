@@ -70,7 +70,7 @@ class CurrenciesHandler(ContaController):
 
 class CurrencyHandler(ContaController):
 	@gen.coroutine
-	def get(self, **params):
+	def get(self):
 		doc = yield currency.get(id)
 		if (doc is None):
 			self.set_status(404)
