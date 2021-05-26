@@ -3,13 +3,18 @@ from components.entity.currency import Currency
 from components.entity.exchange_rate import ExchangeRate
 import tornado.web
 from lib.controller import ContaController
-from tornado import gen
 import couch
 
 entity = Entity()
-entity.initialise()
+exchange_rate = ExchangeRate()
+currency = Currency()
 
 class EntitiesHandler(ContaController):
+	async def init(self):
+		await entity.initialise()
+		await exchange_rate.initialise()
+		await currency.initialise()
+
 	async def post(self):
 		if self.request.body != b'':
 			dict = tornado.escape.json_decode(self.request.body)
@@ -32,85 +37,86 @@ class EntitiesHandler(ContaController):
 
 
 class EntityHandler(ContaController):
-	@gen.coroutine
-	def get(self, id):
-		doc = yield entity.get(id)
-		if (doc is None):
-			self.set_status(404)
-		else:
-			self.write(doc)
+	async def init(self):
+		await entity.initialise()
+		await exchange_rate.initialise()
+		await currency.initialise()
 
-	@gen.coroutine
-	def post(self):
+	async def get(self, id):
+		doc = await entity.get(id)
+		super().write_or_404(doc)
+
+	async def post(self):
 		dict = tornado.escape.json_decode(self.request.body)
-		doc = yield entity.post(dict)
+		doc = await entity.post(dict)
 		self.write(doc)
 
-	@gen.coroutine
-	def delete(self, id):
-		doc = yield entity.delete(id)
-		if (doc is None):
-			self.set_status(404)
-		else:
-			self.write(doc)
+	async def delete(self, id):
+		result = await entity.delete(id)
+		super().write_or_404(result)
 
-
-currency = Currency()
-currency.initialise()
 
 class CurrenciesHandler(ContaController):
-	@gen.coroutine
-	def get(self):
+	async def init(self):
+		await entity.initialise()
+		await exchange_rate.initialise()
+		await currency.initialise()
+
+	async def get(self):
 		try:
-			docs = yield currency.collection()
+			docs = await currency.collection()
 			self.write(docs)
 		except couch.couch.CouchException as err:
 			print(err)
 
 
 class CurrencyHandler(ContaController):
-	@gen.coroutine
-	def get(self):
-		doc = yield currency.get(id)
-		if (doc is None):
-			self.set_status(404)
-		else:
-			self.write(doc)
+	async def init(self):
+		await entity.initialise()
+		await exchange_rate.initialise()
+		await currency.initialise()
 
+	async def get(self):
+		doc = await currency.get(id)
+		super().write_or_404(doc)
 
-exchange_rate = ExchangeRate()
-exchange_rate.initialise()
 
 class ExchangeRateHandler(ContaController):
-	@gen.coroutine
-	def get(self, iso, request_date = None):
-		doc = yield exchange_rate.get(iso, request_date, True)
+	async def init(self):
+		await entity.initialise()
+		await exchange_rate.initialise()
+		await currency.initialise()
+
+	async def get(self, iso, request_date = None):
+		doc = await exchange_rate.get(iso, request_date, True)
 		self.write(doc)
 
 
 class EntityUploadHandler(ContaController):
-	@gen.coroutine
-	def put(self):
+	async def init(self):
+		await entity.initialise()
+		await exchange_rate.initialise()
+		await currency.initialise()
+
+	async def put(self):
 		post_entity = tornado.escape.json_decode(self.get_body_argument("entity"))
 		for file in self.request.files:
-			result = yield entity.save_attachment(post_entity, self.request.files[file][0])
+			result = await entity.save_attachment(post_entity, self.request.files[file][0])
 			post_entity = { '_id': result['id'], '_rev': result['rev'] }
 
 		self.write(post_entity)
 
-	@gen.coroutine
-	def post(self, attachment_name):
+	async def post(self, attachment_name):
 		doc = tornado.escape.json_decode(self.request.body)
 
-		result = yield entity.get_attachment(doc, attachment_name)
+		result = await entity.get_attachment(doc, attachment_name)
 		self.write(result)
 
-	@gen.coroutine
-	def delete(self):
+	async def delete(self):
 		doc = {
 			'_id': self.get_argument('doc_id'),
 			'_rev': self.get_argument('rev')
 		}
 
-		result = yield entity.delete_attachment(doc, self.get_argument('name'))
+		result = await entity.delete_attachment(doc, self.get_argument('name'))
 		self.write(result)

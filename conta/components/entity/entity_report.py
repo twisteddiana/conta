@@ -1,18 +1,13 @@
 from components.couch import CouchClass
-from tornado import gen
 from components.entity.exchange_rate import ExchangeRate
 from lib.moment import *
 
 exchange_rate = ExchangeRate()
-exchange_rate.initialise()
 
 class EntityReport(CouchClass):
-    @gen.coroutine
-    def initialise(self):
-        yield super().initialise('enitites')
+    db_name = 'enitites'
 
-    @gen.coroutine
-    def report(self, query):
+    async def report(self, query):
         dictionary = {
             'design': 'all',
             'reduce': False,
@@ -34,7 +29,7 @@ class EntityReport(CouchClass):
             dictionary['start_key'] = [query['classification'], timestamp(date_start_year)]
             dictionary['end_key'] = [query['classification'], timestamp(date_end)]
 
-        result = yield self.db.view(dictionary['design'], dictionary['view'], **dictionary)
+        result = await self.db.view(dictionary['design'], dictionary['view'], **dictionary)
         # group by months
         report = 0
         transactions = []
@@ -75,9 +70,8 @@ class EntityReport(CouchClass):
             'transactions': transactions
         }
 
-    @gen.coroutine
-    def fiscal_evidence_report(self, query):
-        classifications_result = yield self.db.view('all', 'classification', reduce=True, group_level=1)
+    async def fiscal_evidence_report(self, query):
+        classifications_result = await self.db.view('all', 'classification', reduce=True, group_level=1)
         classifications = []
 
         date_start = start_of_month(get_date(query['date_start']))
@@ -97,7 +91,7 @@ class EntityReport(CouchClass):
                 'include_docs': True
             }
 
-            result = yield self.db.view('all', 'classification', **classifications_query)
+            result = await self.db.view('all', 'classification', **classifications_query)
             for row in result['rows']:
                 transaction_date = datetime.fromtimestamp(row['doc']['date'])
                 amount = row['doc']['deductible_amount'] if 'deductible_amount' in row['doc'] else row['doc'][
@@ -132,8 +126,7 @@ class EntityReport(CouchClass):
             'year': date_start.year
         }
 
-    @gen.coroutine
-    def export(self, query):
+    async def export(self, query):
         exchange_rate.update()
 
         date_start = start_of_month(get_date(query['date_start']))
@@ -148,7 +141,7 @@ class EntityReport(CouchClass):
             'include_docs': True
         }
 
-        result = yield self.db.view(dictionary['design'], dictionary['view'], **dictionary)
+        result = await self.db.view(dictionary['design'], dictionary['view'], **dictionary)
         rows = result['rows']
 
         csv = ''
@@ -159,7 +152,7 @@ class EntityReport(CouchClass):
         for doc in rows:
             doc = doc['doc']
             rate = '1' if doc['currency'] == 'RON' else \
-                (yield exchange_rate.get(doc['currency'], doc['date_clear'], False))['exchange_rate']
+                (await exchange_rate.get(doc['currency'], doc['date_clear'], False))['exchange_rate']
             deductible = doc['deductible'] if doc['type'] == 'payment' else ''
             if 'vat' not in doc:
                 doc['vat'] = ''
@@ -185,8 +178,7 @@ class EntityReport(CouchClass):
 
         return csv
 
-    @gen.coroutine
-    def statement(self, query):
+    async def statement(self, query):
         date_start = start_of_year(get_date(query['year'], '%Y'))
         date_end = end_of_year(get_date(query['year'], '%Y'))
 
@@ -199,7 +191,7 @@ class EntityReport(CouchClass):
             'include_docs': True
         }
 
-        result = yield self.db.view(dictionary['design'], dictionary['view'], **dictionary)
+        result = await self.db.view(dictionary['design'], dictionary['view'], **dictionary)
         rows = result['rows']
 
         brut_income = 0

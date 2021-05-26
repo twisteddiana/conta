@@ -4,7 +4,6 @@ import calendar
 def get_date(date_string, format='%d-%m-%Y'):
     return datetime.strptime(date_string, format)
 
-
 def subtract(date_obj, **kwargs):
     delta = timedelta(**kwargs)
     return date_obj - delta

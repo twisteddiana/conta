@@ -3,7 +3,7 @@ import tornado.web
 import signal
 import logging
 from tornado.options import options
-from lib.settings import settings
+from lib.env import env
 from tornado import gen
 from components.organisations.controller import OrganisationsHandler, OrganisationHandler
 from components.entity.controller import EntityHandler, EntitiesHandler, CurrencyHandler, CurrenciesHandler, ExchangeRateHandler, EntityUploadHandler
@@ -11,6 +11,7 @@ from components.amortizations.controller import AmortizationsHandler, Amortizati
 from components.reports.controller import ReportHandler, StatementHandler, ExportHandler
 from components.inventory.controller import InventoryHandler, InventoryReportHandler
 from components.expenses.controller import ExpensesHandler, ExpensesUploadHandler, ExpensesSheetHandler
+from components.settings.controller import SettingsHandler
 from lib.controller import LoginHandler
 
 import asyncio
@@ -68,8 +69,9 @@ def make_app():
         (r"/expense", ExpensesHandler),
         (r"/currency/?(?P<param_name>[A-Za-z0-9-]+)?/", CurrencyHandler),
         (r"/export", ExportHandler),
+        (r"/settings", SettingsHandler),
         (r"/_session", LoginHandler),
-    ],  **settings)
+    ],  **env)
 
 if __name__ == "__main__":
     if hasattr(asyncio, 'WindowsSelectorEventLoopPolicy'):

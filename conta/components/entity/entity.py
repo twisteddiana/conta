@@ -1,25 +1,12 @@
 from components.couch import CouchClass
-from tornado import gen
 import time
 from lib.moment import *
 
 
 class Entity(CouchClass):
-	@gen.coroutine
-	def initialise(self):
-		yield super().initialise('enitites')
+	db_name = 'enitites'
 
-	@gen.coroutine
-	def get(self, id):
-		has_doc = yield self.db.has_doc(id)
-		if (has_doc):
-			doc = yield self.db.get_doc(id)
-		else:
-			doc = None
-		return doc
-
-	@gen.coroutine
-	def post(self, dict):
+	async def post(self, dict):
 		if 'date_added' in dict.keys():
 			dict['date_updated'] = int(time.time())
 		else:
@@ -29,26 +16,12 @@ class Entity(CouchClass):
 		dict['date'] = timestamp(get_date(dict['date'], '%d-%m-%Y'))
 		dict['real_amount'] = round(dict['real_amount'], 2)
 		dict['real_vat'] = round(dict['real_vat'], 2)
-		doc = yield self.db.save_doc(dict)
+		doc = await self.db.save_doc(dict)
 		return doc
 
-	@gen.coroutine
-	def delete(self, id):
-		has_doc = yield self.db.has_doc(id)
-		if (has_doc):
-			doc = yield self.db.get_doc(id)
-			result = yield self.db.delete_doc(doc)
-			return result
-
-	@gen.coroutine
-	def collection(self, dict):
-		result = yield self.db.view(dict['design'], dict['sort'], include_docs = True, **dict)
-		return result
-
-	@gen.coroutine
-	def reduce(self, dict):
+	async def reduce(self, dict):
 		dict['group_level'] = 1
-		result = yield self.db.view(dict['design'], dict['sort'], **dict)
+		result = await self.db.view(dict['design'], dict['sort'], **dict)
 		return result
 
 	async def filter(self, dictionary):
@@ -56,19 +29,20 @@ class Entity(CouchClass):
 		for key, value in dictionary['filter'].items():
 			if value:
 				if isinstance(value, dict):
-					filter_dict = {}
+					filter_dict = {
+						'inclusive_end': True,
+						'reduce': False,
+					}
 					if 'start_key' in value.keys() and value['start_key']:
 						filter_dict['start_key'] = [value['start_key']]
 					if 'end_key' in value.keys() and value['end_key']:
 						filter_dict['end_key'] = [value['end_key'], {}]
 
-					filter_dict['inclusive_end'] = True
-					filter_dict['reduce'] = False
-
 					result = await self.db.view(dictionary['design'], key, **filter_dict)
 				else:
-					filter_dict = {}
-					filter_dict['reduce'] = False
+					filter_dict = {
+						'reduce': False,
+					}
 					result = {'rows': []}
 					for val in value:
 						filter_dict['start_key'] = [str(val)]
@@ -97,30 +71,26 @@ class Entity(CouchClass):
 			return result
 		else:
 			return {'rows': []}
-
-	@gen.coroutine
-	def save_attachment(self, doc, file):
+	
+	async def save_attachment(self, doc, file):
 		attachment = {
 			'name': file['filename'],
 			'mimetype': file['content_type'],
 			'data': file['body']
 		}
-		result = yield self.db.save_attachment(doc, attachment)
+		result = await self.db.save_attachment(doc, attachment)
 		return result
 
-	@gen.coroutine
-	def delete_attachment(self, doc, attachment_name):
-		result = yield self.db.delete_attachment(doc, attachment_name=attachment_name)
+	async def delete_attachment(self, doc, attachment_name):
+		result = await self.db.delete_attachment(doc, attachment_name=attachment_name)
 		return result
 
-	@gen.coroutine
-	def get_attachment(self, doc, attachment_name):
-		result = yield self.db.get_attachment(doc, attachment_name=attachment_name)
+	async def get_attachment(self, doc, attachment_name):
+		result = await self.db.get_attachment(doc, attachment_name=attachment_name)
 		return result
 
-	@gen.coroutine
-	def remove_amortization(self):
-		result = yield self.db.view('payments', 'classification', start_key=['Amortizari'], end_key=['Amortizari', {}], include_docs=True, reduce=False)
+	async def remove_amortization(self):
+		result = await self.db.view('payments', 'classification', start_key=['Amortizari'], end_key=['Amortizari', {}], include_docs=True, reduce=False)
 		for item in result['rows']:
-			yield self.db.delete_doc(item['doc'])
+			await self.db.delete_doc(item['doc'])
 

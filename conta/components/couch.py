@@ -1,21 +1,16 @@
-from tornado import gen
 import couch.couch
 from couch.couch import json_encode
 import os
 
 
 class MyAsyncCouch(couch.AsyncCouch):
-    @gen.coroutine
-    def find(self, body):
+    async def find(self, body):
         url = '{0}/_find'.format(self.db_name)
-        r = yield self._http_post(url, body=json_encode(body))
-        raise gen.Return(r)
+        return await self._http_post(url, body=json_encode(body))
 
-    @gen.coroutine
-    def explain(self, body):
+    async def explain(self, body):
         url = '{0}/_explain'.format(self.db_name)
-        r = yield self._http_post(url, body=json_encode(body))
-        raise gen.Return(r)
+        return await self._http_post(url, body=json_encode(body))
 
     def __init__(self, db_name='', **request_args):
         couch_url = os.environ.get('COUCH_URL') or 'http://127.0.0.1:5984/'
@@ -28,14 +23,39 @@ class MyAsyncCouch(couch.AsyncCouch):
 
 class CouchClass:
     db = None
+    db_name = None
 
-    @gen.coroutine
-    def initialise(self, db_name):
-        self.db = MyAsyncCouch(db_name)
+    async def initialise(self):
+        if self.db is not None:
+            return self
+        if self.db_name is None:
+            return
+
+        self.db = MyAsyncCouch(self.db_name)
         try:
-            yield self.db.create_db()
+            await self.db.create_db()
         except:
             pass
+        return self
+
+    async def get(self, id):
+        await self.initialise()
+        try:
+            return await self.db.get_doc(id)
+        except:
+            return None
+
+    async def delete(self, id):
+        await self.initialise()
+        try:
+            doc = await self.db.get_doc(id)
+            return await self.db.delete_doc(doc)
+        except:
+            return None
+
+    async def collection(self, dict):
+        await self.initialise()
+        return await self.db.view(dict['design'], dict['sort'], include_docs=True, **dict)
 
     def close(self):
         self.db.close()

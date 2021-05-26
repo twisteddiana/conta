@@ -1,39 +1,28 @@
 from components.couch import CouchClass
-from tornado import gen
 import time
-from datetime import date
 from lib.moment import *
 from components.entity.entity import Entity
 from components.inventory.inventory import Inventory
+from components.settings.settings import Settings
 import math
 import calendar
 
 entity = Entity()
-entity.initialise()
 inventory = Inventory()
-inventory.initialise()
+settings = Settings()
 
 class Amortization(CouchClass):
-	max_installment = 1500
+	db_name = 'amortizations'
 
-	@gen.coroutine
-	def initialise(self):
-		yield super().initialise('amortizations')
+	async def initialise(self):
+		await super().initialise()
+		await entity.initialise()
+		await inventory.initialise()
+		await settings.initialise()
 
-	@gen.coroutine
-	def get(self, id):
-		has_doc = yield self.db.has_doc(id)
-		print(has_doc)
-		if has_doc:
-			doc = yield self.db.get_doc(id)
-		else:
-			doc = None
-		return doc
-
-	@gen.coroutine
-	def post(self, doc):
+	async def post(self, doc):
 		if '_id' in doc.keys():
-			current_doc = yield self.get(doc['_id'])
+			current_doc = await self.get(doc['_id'])
 		else:
 			current_doc = None
 
@@ -44,8 +33,8 @@ class Amortization(CouchClass):
 		doc['last_date'] = int(time.mktime(last_date.timetuple()))
 		doc['last_date_clear'] = last_date.strftime('%d-%m-%Y')
 
-		result = yield self.db.save_doc(doc)
-		doc = yield self.db.get_doc(result['id'])
+		result = await self.db.save_doc(doc)
+		doc = await self.db.get_doc(result['id'])
 		create_installments = True
 		if current_doc and current_doc['date'] == doc['date'] and current_doc['amount'] == doc['amount'] and current_doc['duration'] == doc['duration']:
 			# nothing changed
@@ -53,63 +42,50 @@ class Amortization(CouchClass):
 
 		if create_installments:
 			if current_doc:
-				yield self.remove_installments(current_doc['_id'])
+				await self.remove_installments(current_doc['_id'])
 			for i in range(0, doc['duration']):
-				yield self.create_installment(doc, add_months(initial_date, i), i)
+				await self.create_installment(doc, add_months(initial_date, i), i)
 
-			yield self.create_inventory_entry(doc)
+			await self.create_inventory_entry(doc)
 
 		return doc
 
-	@gen.coroutine
-	def remove_installments(self, doc_id):
-		has_doc = yield self.db.has_doc(doc_id)
-		if (has_doc):
-			result = yield self.db.view('installments', 'object', start_key=[doc_id], end_key=[doc_id, {}], reduce=False, include_docs=True)
+	async def remove_installments(self, doc_id):
+		has_doc = await self.db.has_doc(doc_id)
+		if has_doc:
+			result = await self.db.view('installments', 'object', start_key=[doc_id], end_key=[doc_id, {}], reduce=False, include_docs=True)
 			for installment in result['rows']:
-				yield self.db.delete_doc(installment['doc'])
+				await self.db.delete_doc(installment['doc'])
 
-	def get_installment_amount(self, doc):
+	async def get_installment_amount(self, doc, year):
+		max_installment = await settings.max_installment(year)
 		amount = round(float(doc['amount']) / int(doc['duration']), 2)
-		return min(amount, self.max_installment)
+		return min(amount, max_installment)
 
-	@gen.coroutine
-	def create_installment(self, doc, installment_date, installment_number):
+	async def create_installment(self, doc, installment_date, installment_number):
 		installment = {
 			'type': 'installment',
 			'date':  int(time.mktime(installment_date.timetuple())),
 			'date_clear': installment_date.strftime('%d-%m-%Y'),
 			'object_id': doc['_id'],
 			'installment': installment_number + 1,
-			'amount': self.get_installment_amount(doc),
+			'amount': await self.get_installment_amount(doc, installment_date.strftime('%Y')),
 			'name': doc['name']
 		}
 
-		yield self.db.save_doc(installment)
+		return await self.db.save_doc(installment)
 
-	@gen.coroutine
-	def collection(self, dict):
-		result = yield self.db.view(dict['design'], dict['sort'], include_docs=True, **dict)
-		return result
+	async def delete(self, id):
+		await self.remove_installments(id)
+		await super().delete(id)
 
-	@gen.coroutine
-	def delete(self, id):
-		has_doc = yield self.db.has_doc(id)
-		if (has_doc):
-			doc = yield self.db.get_doc(id)
-			yield self.remove_installments(id)
-			result = yield self.db.delete_doc(doc)
-			return result
-
-	@gen.coroutine
-	def liquidated(self, id):
+	async def liquidated(self, id):
 		end_date = int(time.mktime(datetime.today().timetuple()))
-		result = yield self.db.view('installments', 'object', start_key=[id], end_key=[id, end_date], reduce=True, group_level=1)
+		result = await self.db.view('installments', 'object', start_key=[id], end_key=[id, end_date], reduce=True, group_level=1)
 		return result['rows'][0]['value']
 
-	@gen.coroutine
-	def synchronize(self):
-		result = yield self.db.view('installments', 'date', include_docs=True)
+	async def synchronize(self):
+		result = await self.db.view('installments', 'date', include_docs=True)
 		group = None
 		month = 0
 		year = 0
@@ -121,7 +97,7 @@ class Amortization(CouchClass):
 				group['deductible_amount'] += item['doc']['amount']
 			else:
 				if group is not None:
-					result = yield entity.post(group)
+					result = await entity.post(group)
 
 				group = {
 					'date': item['doc']['date_clear'],
@@ -144,11 +120,10 @@ class Amortization(CouchClass):
 
 		# save last group
 		if group is not None:
-			result = yield entity.post(group)
+			result = await entity.post(group)
 		return result
 
-	@gen.coroutine
-	def report(self, query):
+	async def report(self, query):
 		date_start = datetime.strptime(query['date_start'], '%d-%m-%Y')
 		# first day of the month
 		date_start = date_start - timedelta(days=date_start.day - 1)
@@ -170,7 +145,7 @@ class Amortization(CouchClass):
 			'reduce': False,
 			'include_docs': True,
 		}
-		result = yield self.db.view(options['design'], options['view'], **options)
+		result = await self.db.view(options['design'], options['view'], **options)
 		# group by months
 		report = 0
 		transactions = []
@@ -195,9 +170,8 @@ class Amortization(CouchClass):
 			'transactions': transactions
 		}
 
-	@gen.coroutine
-	def prepareSheet(self, id):
-		doc = yield self.get(id)
+	async def prepare_sheet(self, id):
+		doc = await self.get(id)
 		if doc:
 			doc['date'] = datetime.fromtimestamp(doc['date'])
 			doc['date'] = add_months(doc['date'], 1)
@@ -205,18 +179,17 @@ class Amortization(CouchClass):
 
 		return doc
 
-	@gen.coroutine
-	def create_inventory_entry(self, document):
+	async def create_inventory_entry(self, document):
 		search = {
 			'design': 'default',
 			'sort': 'amortization_id',
 			'keys': [document['_id']]
 		}
 
-		inventory_document = yield inventory.collection(search)
+		inventory_document = await inventory.collection(search)
 		if inventory_document['rows']:
 			inventory_document = inventory_document['rows'][0]
-			inventory_document = yield inventory.get(inventory_document['doc']['_id'])
+			inventory_document = await inventory.get(inventory_document['doc']['_id'])
 		else:
 			inventory_document = {}
 
@@ -237,7 +210,7 @@ class Amortization(CouchClass):
 			first_installment = document['date']
 			last_day_of_year = int(time.mktime(datetime(year, month=12, day=31).timetuple()))
 
-			installments = yield self.db.view('installments', 'object', start_key=[document['_id'], first_installment], end_key=[document['_id'], last_day_of_year], reduce=True, group_level=1)
+			installments = await self.db.view('installments', 'object', start_key=[document['_id'], first_installment], end_key=[document['_id'], last_day_of_year], reduce=True, group_level=1)
 			total_installment = round(installments['rows'][0]['value'])
 
 			log = {
@@ -249,7 +222,7 @@ class Amortization(CouchClass):
 
 			inventory_document['logs'].append(log)
 
-		result = yield inventory.post(inventory_document)
+		result = await inventory.post(inventory_document)
 		return result
 
 
