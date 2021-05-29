@@ -70,6 +70,7 @@ def make_app():
         (r"/currency/?(?P<param_name>[A-Za-z0-9-]+)?/", CurrencyHandler),
         (r"/export", ExportHandler),
         (r"/settings", SettingsHandler),
+        (r"/settings/(.*)", SettingsHandler),
         (r"/_session", LoginHandler),
     ],  **env)
 

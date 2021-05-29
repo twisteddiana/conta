@@ -8,21 +8,19 @@ class SettingsHandler(ContaController):
 	async def init(self):
 		await settings.initialise()
 
+	async def post(self):
+		result = await settings.collection()
+		self.write_or_404(result)
+
 	async def get(self, id):
 		doc = await settings.get(id)
-		if (doc is None):
-			self.set_status(404)
-		else:
-			self.write(doc)
+		self.write_or_404(doc)
 
-	async def post(self):
+	async def put(self):
 		dict = tornado.escape.json_decode(self.request.body)
 		doc = await settings.post(dict)
 		self.write(doc)
 
 	def delete(self, id):
-		doc = yield settings.delete(id)
-		if (doc is None):
-			self.set_status(404)
-		else:
-			self.write(doc)
+		result = yield settings.delete(id)
+		self.write_or_404(result)

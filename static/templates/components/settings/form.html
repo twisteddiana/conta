@@ -1,0 +1,107 @@
+<form ng-submit="submit(settingsForm.$valid)" novalidate name="settingsForm" class="col-12">
+    <div class="row">
+        <div class="page-header">
+            <div class="toolbar">
+                <div class="text-right">
+                    <a ui-sref="app.income" class="btn btn-warning">
+                        <i class="fa fa-chevron-left"></i> Back
+                    </a>
+                    <button class="btn btn-success" ng-disabled="settingsForm.$invalid">
+                        <i class="fa fa-check"></i> Save
+                    </button>
+                </div>
+            </div>
+            <h2>{{title}} <span>{{subtitle}}</span></h2>
+        </div>
+        <div class="col-12">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="box">
+                        <div class="form-group row">
+                            <div class="col-lg-4">
+                                <label class="form-control-label">Year</label>
+                            </div>
+                            <div class="col-lg-8">
+                                <input type="number" class="form-control" ng-model="item.year" list="year_list">
+                                <datalist id="year_list">
+                                    <option>2022</option>
+                                    <option>2021</option>
+                                    <option>2020</option>
+                                    <option>2019</option>
+                                    <option>2018</option>
+                                    <option>2017</option>
+                                    <option>2016</option>
+                                    <option>2015</option>
+                                </datalist>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-4">
+                                <label class="form-control-label">Max amortizare</label>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="input-group">
+                                    <input type="number" model-view-value="true" class="form-control" ng-required="!year" ng-model="item.max_installment">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-4">
+                                <label class="form-control-label">Max deductibil</label>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="input-group">
+                                    <input type="number" model-view-value="true" class="form-control" ng-required="!year" ng-model="item.max_deductible">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-4">
+                                <label class="form-control-label">Platitor TVA</label>
+                            </div>
+                            <div class="col-lg-8">
+                                <select class="form-control" required ng-model="item.vat_registered">
+                                    <option value="0">Da</option>
+                                    <option value="1">Nu</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-4">
+                                <label class="form-control-label">Salariu mediu pe economie</label>
+                            </div>
+                            <div class="col-lg-8">
+                                <input type="number" class="form-control" required ng-model="item.base_salary">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-4">
+                                <label class="form-control-label">Impozit pe venit</label>
+                            </div>
+                            <div class="col-lg-8">
+                                <input type="number" class="form-control" required ng-model="item.income_tax">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-4">
+                                <label class="form-control-label">Contributii sociale (Pensie)</label>
+                            </div>
+                            <div class="col-lg-8">
+                                <input type="number" class="form-control" required ng-model="item.cas">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-lg-4">
+                                <label class="form-control-label">Contributii sociale (Sanatate)</label>
+                            </div>
+                            <div class="col-lg-8">
+                                <input type="number" class="form-control" required ng-model="item.cass">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

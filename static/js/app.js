@@ -31,3 +31,4 @@ require('./app/inventory');
 require('./app/organisations');
 require('./app/payments');
 require('./app/reports');
+require('./app/settings');

@@ -1,13 +1,24 @@
 from components.couch import CouchClass
 from components.entity.exchange_rate import ExchangeRate
+from components.settings.settings import Settings
 from lib.moment import *
 
 exchange_rate = ExchangeRate()
+settings = Settings()
 
 class EntityReport(CouchClass):
     db_name = 'enitites'
 
+    def get_amount(self, item, vat_registered, deductible_only):
+        real_amount = item['real_amount']
+        if vat_registered:
+            real_amount -= item['real_vat']
+        if deductible_only:
+            real_amount = real_amount * item['deductible'] / 100
+        return round(real_amount, 2)
+
     async def report(self, query):
+        await settings.initialise()
         dictionary = {
             'design': 'all',
             'reduce': False,
@@ -19,6 +30,8 @@ class EntityReport(CouchClass):
         date_start_timestamp = timestamp(date_start)
 
         date_end = end_of_month(get_date(query['date_end']))
+
+        vat_registered = await settings.vat_registered(get_date(query['date_start']).year)
 
         if query['report'] == 'registry' or query['report'] == 'fiscal_evidence':
             dictionary['view'] = 'date'
@@ -36,16 +49,11 @@ class EntityReport(CouchClass):
         deductible_only = query['report'] == 'journal'
         for item in result['rows']:
             item = item['doc']
-            if item['date'] < date_start_timestamp:
-                if deductible_only:
-                    # sum up only deductible
-                    report += round(item['real_amount'] * item['deductible'] / 100, 2)
-                else:
-                    # sum up the amount
-                    report += round(item['real_amount'], 2)
-            else:
-                transaction_date = datetime.fromtimestamp(item['date'])
+            transaction_date = datetime.fromtimestamp(item['date'])
 
+            if item['date'] < date_start_timestamp:
+                report += self.get_amount(item, vat_registered, deductible_only)
+            else:
                 transaction = {
                     'date': item['date_clear'],
                     'document_type': item['document_type'],
@@ -57,13 +65,9 @@ class EntityReport(CouchClass):
                     'type': item['type'],
                     'foreign_currency_amount': str(item['amount']) + " " + item['currency'] if item['currency'] != 'RON' else '',
                 }
-                if 'real_amount' in item.keys():
-                    if deductible_only:
-                        # sum up only deductible
-                        transaction['amount'] = round(item['real_amount'] * item['deductible'] / 100, 2)
-                    else:
-                        transaction['amount'] = round(item['real_amount'], 2)
-                        transaction['deductible'] = item['deductible']
+                transaction['amount'] = self.get_amount(item, vat_registered, deductible_only)
+                transaction['deductible'] = item['deductible']
+
                 transactions.append(transaction)
         return {
             'report': report,
@@ -71,6 +75,9 @@ class EntityReport(CouchClass):
         }
 
     async def fiscal_evidence_report(self, query):
+        await settings.initialise()
+        vat_registered = await settings.vat_registered(get_date(query['date_start']).year)
+
         classifications_result = await self.db.view('all', 'classification', reduce=True, group_level=1)
         classifications = []
 
@@ -94,8 +101,7 @@ class EntityReport(CouchClass):
             result = await self.db.view('all', 'classification', **classifications_query)
             for row in result['rows']:
                 transaction_date = datetime.fromtimestamp(row['doc']['date'])
-                amount = row['doc']['deductible_amount'] if 'deductible_amount' in row['doc'] else row['doc'][
-                    'real_amount']
+                amount = self.get_amount(row['doc'], vat_registered, True)
                 if amount == 0:
                     continue
                 transaction = {
@@ -182,6 +188,9 @@ class EntityReport(CouchClass):
         date_start = start_of_year(get_date(query['year'], '%Y'))
         date_end = end_of_year(get_date(query['year'], '%Y'))
 
+        await settings.initialise()
+        vat_registered = await settings.vat_registered(get_date(query['date_start']).year)
+
         dictionary = {
             'design': 'all',
             'view': 'date',
@@ -208,10 +217,11 @@ class EntityReport(CouchClass):
                 if doc['doc']['deductible'] < 100:
                     untaxable_income += round(doc['doc']['real_amount'] * (100 - doc['doc']['deductible']) / 100, 2)
             else:
+                amount = self.get_amount(doc['doc'], vat_registered, True)
                 if doc['doc']['classification'] == 'CAS (pensie)' or doc['doc']['classification'] == 'CASS (sanatate)':
-                    social_payments[doc['doc']['classification']] += round(doc['doc']['deductible_amount'], 2)
+                    social_payments[doc['doc']['classification']] += round(amount, 2)
                 else:
-                    payments += round(doc['doc']['deductible_amount'], 2)
+                    payments += round(amount, 2)
 
         brut_income = round(brut_income, 2)
         untaxable_income = round(untaxable_income, 2)
