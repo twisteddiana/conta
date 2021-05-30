@@ -83,6 +83,9 @@ angular
 
     const downloadReport = (data, report) => {
       let name = report.name + ' ';
+      if (report.classification) {
+        name += `${report.classification} `;
+      }
       if (typeof report.month != 'undefined' && report.month > 0)
         name += report.month + '.';
       name += report.year;
@@ -97,8 +100,8 @@ angular
 
     const downloadExport = (data, report) => {
       let name = report.name + ' ';
-      if (data.classification) {
-        name += `${data.classification} `;
+      if (report.classification) {
+        name += `${report.classification} `;
       }
       if (typeof report.month != 'undefined' && report.month > 0)
         name += report.month + '.';
