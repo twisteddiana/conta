@@ -33,6 +33,26 @@ class Settings(CouchClass):
         settings = await self.get(year)
         return settings['income_tax']
 
+    async def cas_percent(self, year):
+        settings = await self.get(year)
+        return settings['cas']
+
+    async def cas_from_total(self, year):
+        settings = await self.get(year)
+        return settings['cas_from_total']
+
+    async def calculate_cas(self, year):
+        settings = await self.get(year)
+        return settings['calculate_cas'] if 'calculate_cas' in settings.keys() else True
+
+    async def cass_percent(self, year):
+        settings = await self.get(year)
+        return settings['cass']
+
+    async def cass_from_total(self, year):
+        settings = await self.get(year)
+        return settings['cass_from_total']
+
     async def post(self, dict):
         if 'year' not in dict.keys():
             dict['year'] = '';

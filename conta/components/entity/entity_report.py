@@ -134,6 +134,8 @@ class EntityReport(CouchClass):
 
     async def export(self, query):
         exchange_rate.update()
+        await settings.initialise()
+        vat_registered = await settings.vat_registered(get_date(query['date_start']).year)
 
         date_start = start_of_month(get_date(query['date_start']))
         date_end = end_of_month(get_date(query['date_end']))
@@ -160,6 +162,8 @@ class EntityReport(CouchClass):
             rate = '1' if doc['currency'] == 'RON' else \
                 (await exchange_rate.get(doc['currency'], doc['date_clear'], False))['exchange_rate']
             deductible = doc['deductible'] if doc['type'] == 'payment' else ''
+            deductible_amount = self.get_amount(doc, vat_registered, deductible)
+
             if 'vat' not in doc:
                 doc['vat'] = ''
                 doc['real_vat'] = ''
@@ -175,7 +179,7 @@ class EntityReport(CouchClass):
                 'Valoare RON': doc['real_amount'],
                 'TVA RON': doc['real_vat'],
                 'Deductibil %': deductible,
-                'Deductibil RON': round(doc['deductible_amount'], 2) if deductible != '' else ''
+                'Deductibil RON': deductible_amount if deductible != '' else ''
             }
             row = []
             for header in headers:
@@ -189,7 +193,14 @@ class EntityReport(CouchClass):
         date_end = end_of_year(get_date(query['year'], '%Y'))
 
         await settings.initialise()
-        vat_registered = await settings.vat_registered(get_date(query['date_start']).year)
+        vat_registered = await settings.vat_registered(query['year'])
+        income_tax_percent = await settings.income_tax(query['year'])
+        cas_percent = await settings.cas_percent(query['year'])
+        cas_from_total = await settings.cas_from_total(query['year'])
+        calculate_cas = await settings.calculate_cas(query['year'])
+        cass_percent = await settings.cass_percent(query['year'])
+        cass_from_total = await settings.cass_from_total(query['year'])
+        base_salary = await settings.base_salary(query['year'])
 
         dictionary = {
             'design': 'all',
@@ -213,9 +224,10 @@ class EntityReport(CouchClass):
 
         for doc in rows:
             if doc['doc']['type'] == 'income':
-                brut_income += round(doc['doc']['real_amount'], 2)
+                real_amount = self.get_amount(doc['doc'], vat_registered, False)
+                brut_income += real_amount
                 if doc['doc']['deductible'] < 100:
-                    untaxable_income += round(doc['doc']['real_amount'] * (100 - doc['doc']['deductible']) / 100, 2)
+                    untaxable_income += round(real_amount * (100 - doc['doc']['deductible']) / 100, 2)
             else:
                 amount = self.get_amount(doc['doc'], vat_registered, True)
                 if doc['doc']['classification'] == 'CAS (pensie)' or doc['doc']['classification'] == 'CASS (sanatate)':
@@ -230,33 +242,20 @@ class EntityReport(CouchClass):
         social_payments['CASS (sanatate)'] = round(social_payments['CASS (sanatate)'], 2)
         net_income = round(brut_income - payments, 2)
 
-        if query['year'] <= '2015':
-            medical_insurance = round((net_income - untaxable_income) * 5.5 / 100, 2)
-            pension = round((net_income - untaxable_income) * 10.5 / 100, 2)
-            income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 16 / 100, 2)
-        elif query['year'] == '2016':
-            medical_insurance = round((net_income - untaxable_income) * 5.5 / 100, 2)
+        if calculate_cas:
+            if cas_from_total:
+                pension = round((net_income - untaxable_income) * cas_percent / 100, 2)
+            else:
+                pension = round(base_salary * 12 * cas_percent / 100, 2)
+        else:
             pension = social_payments['CAS (pensie)']
-            income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 16 / 100, 2)
-        elif query['year'] == '2017':
-            medical_insurance = round((net_income - untaxable_income) * 5.5 / 100, 2)
-            pension = social_payments['CAS (pensie)']
-            income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 16 / 100, 2)
-        elif query['year'] == '2018':
-            base = 1900
-            medical_insurance = round(base * 12 * 10 / 100, 2)
-            pension = round(base * 12 * 25 / 100, 2)
-            income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 10 / 100, 2)
-        elif query['year'] == '2019':
-            base = 2080
-            medical_insurance = round(base * 12 * 10 / 100, 2)
-            pension = round(base * 12 * 25 / 100, 2)
-            income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 10 / 100, 2)
-        elif query['year'] == '2020':
-            base = 2230
-            medical_insurance = round(base * 12 * 10 / 100, 2)
-            pension = round(base * 12 * 25 / 100, 2)
-            income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 10 / 100, 2)
+
+        if cass_from_total:
+            medical_insurance = round((net_income - untaxable_income) * cass_percent / 100, 2)
+        else:
+            medical_insurance = round(base_salary * 12 * cass_percent / 100, 2)
+
+        income_tax = round((net_income - untaxable_income - medical_insurance) * income_tax_percent / 100, 2)
 
         return {
             'brut_income': brut_income,
@@ -268,3 +267,31 @@ class EntityReport(CouchClass):
             'pension': pension,
             'income_tax': income_tax
         }
+
+    # if query['year'] <= '2015':
+    #     medical_insurance = round((net_income - untaxable_income) * 5.5 / 100, 2)
+    #     pension = round((net_income - untaxable_income) * 10.5 / 100, 2)
+    #     income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 16 / 100, 2)
+    # elif query['year'] == '2016':
+    #     medical_insurance = round((net_income - untaxable_income) * 5.5 / 100, 2)
+    #     pension = social_payments['CAS (pensie)']
+    #     income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 16 / 100, 2)
+    # elif query['year'] == '2017':
+    #     medical_insurance = round((net_income - untaxable_income) * 5.5 / 100, 2)
+    #     pension = social_payments['CAS (pensie)']
+    #     income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 16 / 100, 2)
+    # elif query['year'] == '2018':
+    #     base = 1900
+    #     medical_insurance = round(base * 12 * 10 / 100, 2)
+    #     pension = round(base * 12 * 25 / 100, 2)
+    #     income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 10 / 100, 2)
+    # elif query['year'] == '2019':
+    #     base = 2080
+    #     medical_insurance = round(base * 12 * 10 / 100, 2)
+    #     pension = round(base * 12 * 25 / 100, 2)
+    #     income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 10 / 100, 2)
+    # elif query['year'] == '2020':
+    #     base = 2230
+    #     medical_insurance = round(base * 12 * 10 / 100, 2)
+    #     pension = round(base * 12 * 25 / 100, 2)
+    #     income_tax = round((net_income - untaxable_income - medical_insurance - pension) * 10 / 100, 2)
