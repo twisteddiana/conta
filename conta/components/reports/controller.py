@@ -48,7 +48,7 @@ class ReportHandler(ContaController):
 		return html
 
 	async def registry_report(self, query):
-		result = await entity.report(query)
+		result = await entity.report(query, True)
 		html = self.render_string("reports/" + query['report'] + '.html',
 								report=result['report'], transactions=result['transactions'])
 		return html

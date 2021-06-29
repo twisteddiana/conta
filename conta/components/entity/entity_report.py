@@ -17,7 +17,7 @@ class EntityReport(CouchClass):
             real_amount = real_amount * item['deductible'] / 100
         return round(real_amount, 2)
 
-    async def report(self, query):
+    async def report(self, query, include_vat = False):
         await settings.initialise()
         dictionary = {
             'design': 'all',
@@ -32,6 +32,7 @@ class EntityReport(CouchClass):
         date_end = end_of_month(get_date(query['date_end']))
 
         vat_registered = await settings.vat_registered(get_date(query['date_start']).year)
+        exclude_vat = not include_vat and vat_registered
 
         if query['report'] == 'registry' or query['report'] == 'fiscal_evidence':
             dictionary['view'] = 'date'
@@ -52,7 +53,7 @@ class EntityReport(CouchClass):
             transaction_date = datetime.fromtimestamp(item['date'])
 
             if item['date'] < date_start_timestamp:
-                report += self.get_amount(item, vat_registered, deductible_only)
+                report += self.get_amount(item, exclude_vat, deductible_only)
             else:
                 transaction = {
                     'date': item['date_clear'],
@@ -65,7 +66,7 @@ class EntityReport(CouchClass):
                     'type': item['type'],
                     'foreign_currency_amount': str(item['amount']) + " " + item['currency'] if item['currency'] != 'RON' else '',
                 }
-                transaction['amount'] = self.get_amount(item, vat_registered, deductible_only)
+                transaction['amount'] = self.get_amount(item, exclude_vat, deductible_only)
                 transaction['deductible'] = item['deductible']
 
                 transactions.append(transaction)
