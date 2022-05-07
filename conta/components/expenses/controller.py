@@ -1,16 +1,13 @@
 from components.expenses.expenses import Expenses
 import tornado.web
 from lib.controller import ContaController
-from components.entity.entity import Entity
 import pdfkit
 from lib.env import env
 
 expenses = Expenses()
-entity = Entity()
 
 class ExpensesHandler(ContaController):
     async def init(self):
-        await entity.initialise()
         await expenses.initialise()
 
     async def post(self):

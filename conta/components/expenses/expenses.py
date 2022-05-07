@@ -7,6 +7,10 @@ entity = Entity()
 class Expenses(CouchClass):
 	db_name = 'expenses'
 
+	async def initialise(self):
+		await super().initialise()
+		await entity.initialise()
+
 	async def post(self, doc):
 		doc['date_clear'] = doc['date']
 		doc['deductible_amount'] = round(doc['deductible_amount'], 2)
