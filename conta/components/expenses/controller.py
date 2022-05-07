@@ -6,6 +6,7 @@ import pdfkit
 from lib.env import env
 
 expenses = Expenses()
+entity = Entity()
 
 class ExpensesHandler(ContaController):
     async def init(self):
